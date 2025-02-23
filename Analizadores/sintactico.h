@@ -11,13 +11,41 @@ class Syntax{
     Syntax(){};
         void getsyntax(vector<string> &datos){
             
-            cout << datos[1];
+            
+            // WORKS (⊙_⊙;)
+            bool flag = false;
+            programOpener(datos, flag);
+            if (flag) { cout << "ERROR: eL programa debe iniciar con la palabra 'program' "; return; }
+            // WORKS (⊙_⊙;)
+
             /*int countId = std::count(identifiers.begin(), identifiers.end(), datos);
             if (countId > 0) {
                 cout << " condicional Identifier " << endl;
             }*/
 
         };
+
+
+        void temp_lines(vector<string> &datos){
+            
+        }
+
+        void programOpener(vector<string> &datos, bool& flag) {
+
+            if (datos.empty()) {
+                throw runtime_error("ERROR: el programa esta vacío.");
+            }
+            
+            string temp_word = datos[0];
+            transform(temp_word.begin(), temp_word.end(), temp_word.begin(), ::tolower);
+
+            if(temp_word != "program") {
+                flag = true;
+                return;
+            }
+
+            return;
+        }
 
         void getsyntaxvar(vector<string> &datos)
         {

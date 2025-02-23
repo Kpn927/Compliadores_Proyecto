@@ -90,7 +90,38 @@ class Syntax{
             {
                 cout << " ERROR: ARBOL DE VARIABLES";
             }
-        }*/
+        }*/       
     }
+    void CommentAnalizer(const string& datos) {
+        size_t i = 0;
+        bool multiLine = false;
+        //size_t multiLineStart = 0;
+
+        while (i < datos.length()) {
+            if (!multiLine && datos.substr(i, 2) == "//") { // Comentario de una Linea
+                i += 2; // Saltamos por que no nos importa tbh
+                while (i < datos.length() && datos[i] != '\n') { // nos vamos al salto de linea
+                    i++;
+                } 
+                if (i < datos.length() && datos[i] == '\n') { // saltamos el salto de linea
+                    i++;
+                }
+            } else if (!multiLine && datos.substr(i, 2) == "/*") { // Empezamos con los comentarios multilineales
+                multiLine = true;
+                //multiLineStart = i;
+                i += 2;
+            } else if (multiLine && datos.substr(i, 2) == "*/") {
+                multiLine = false;
+                i += 2;
+            } else if (multiLine && i == datos.length() - 1) {
+                cout << "ERROR: Comentario Multilineal no cerrado" << endl;
+                break;
+            } else {
+                i++;
+            }
+        }
+        
+
+    };
 };
 

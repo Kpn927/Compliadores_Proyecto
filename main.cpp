@@ -20,6 +20,7 @@ int main() {
 
     //PrintingTokens(tokens);
     Syntax tumama;
+    tumama.CommentAnalizer(datos);
     
     tumama.getsyntax(tokens);
     

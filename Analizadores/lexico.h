@@ -1,0 +1,169 @@
+#pragma once
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <cctype> //isanum isalpha isdigit
+
+using namespace std;
+
+enum class Tokens {
+    RESERVED, // if, else, while
+    OPERATOR, // + - / *
+    DATA_TYPE, // variables
+    IDENTIFIER, // function names, class names   
+    OTHERS, 
+    VARIABLE,
+    DELIMETER,
+    NUMBER
+};
+
+vector<string> reserved = {"if", "then", "to", "do", "writeln", "readln"};
+vector<string> operators = {"+", "-", "*", "/", ":=", "=", ">", "<", ">=", "<=", "==", "!=", "++",":"};
+vector<string> dataType = {"integer", "real", "character", "array", "boolean", "double"};
+vector<string> identifiers = {"var", "const", "procedure", "function", "begin", "end", "program"};
+vector<string> variables = {"x", "i", "j", "y"};
+vector<string> delimiters = {"(", ")", ";",  ",", ".", "{", "}"};
+
+void show_vector(const vector<string>& v);
+void PrintingTokens(const vector<string>& v);
+vector<string> tokenize(const string& input);
+void PushToVariable(vector<string>& variables, const string& v);
+
+void show_vector(const vector<string>& v) {
+    for (const auto& x : v)
+        cout << x << " ";
+    cout << endl;
+}
+
+bool isReserved(const string& word) {
+    for (const auto& type : reserved) {
+        if (word == type) return true;
+    }
+    return false;
+}
+
+bool isOperator(const string& word) {
+    for (const auto& type : operators) {
+        if (word == type) return true;
+    }
+    return false;
+}
+
+bool isDataType(const string& word) {
+    for (const auto& type : dataType) {
+        if (word == type) return true;
+    }
+    return false;
+}
+
+bool isIdentifer(const string& word) {
+    for (const auto& type : identifiers) {
+        if (word == type) return true;
+    }
+    return false;
+}
+
+bool isVariable(const string& word) {
+    for (const auto& type : variables) {
+        if (word == type) return true;
+    }
+    return false;
+}
+
+bool isDelimeter(const string& word) {
+    for (const auto& type : delimiters) {
+        if (word == type) return true;
+    }
+    return false;
+}
+
+bool isNumber(const string& word) {
+    for (char ch : word) {
+        if (!isdigit(ch)) return false;
+    }
+    return !word.empty();
+}
+
+Tokens getTokenType(const string& word) {
+    if (isReserved(word)) return Tokens::RESERVED;
+    if (isOperator(word)) return Tokens::OPERATOR;
+    if (isDataType(word)) return Tokens::DATA_TYPE;
+    if (isIdentifer(word)) return Tokens::IDENTIFIER;
+    if (isVariable(word)) return Tokens::VARIABLE;
+    if (isDelimeter(word)) return Tokens::DELIMETER;
+    if (isNumber(word)) return Tokens::NUMBER;
+    return Tokens::OTHERS;
+}
+
+void PrintingTokens(const vector<string>& v) {
+    for (const auto& word : v) {
+        Tokens type = getTokenType(word);
+        switch (type) {
+            case Tokens::RESERVED:
+                cout << "Reserved word: " << word << endl;
+                break;
+            case Tokens::OPERATOR:
+                cout << "Operator: " << word << endl;
+                break;
+            case Tokens::DATA_TYPE:
+                cout << "Data type: " << word << endl;
+                break;
+            case Tokens::IDENTIFIER:
+                cout << "Identifier: " << word << endl;
+                break;
+            case Tokens::OTHERS:
+                cout << "Other: " << word << endl;
+                break;
+            case Tokens::VARIABLE:
+                cout << "Variable: " << word << endl;
+                break;
+            case Tokens::DELIMETER:
+                cout << "Delimeter: " << word << endl;
+                break;
+            case Tokens::NUMBER:
+                cout << "Number: " << word << endl;
+                break;
+        }
+    }
+}
+
+vector<string> tokenize(const string& input) {
+    vector<string> tokens;
+    string token;
+    for (size_t i = 0; i < input.size(); i++) {
+        char ch = input[i];
+        if (isspace(ch)) {
+            if (!token.empty()) {
+                tokens.push_back(token);
+                token.clear();
+            }
+        } else if (isalnum(ch) || ch == '_') {
+            token += ch;
+        } else {
+            if (!token.empty()) {
+                tokens.push_back(token);
+                token.clear();
+            }
+            if (i + 1 < input.size()) {
+                string potentialOperator = string(1, ch) + input[i + 1];
+                if (isOperator(potentialOperator)) {
+                    tokens.push_back(potentialOperator);
+                    i++;
+                    continue;
+                }
+            }
+            tokens.push_back(string(1, ch));
+        }
+    }
+    if (!token.empty()) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+void PushToVariable(vector<string>& variables, const string& v) {
+    variables.push_back(v);
+}

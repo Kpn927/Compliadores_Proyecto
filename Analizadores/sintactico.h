@@ -11,12 +11,23 @@ class Syntax{
     Syntax(){};
         void getsyntax(vector<string> &datos){
             
+            // WORKS (⊙_⊙;)
+            if (!programOpener(datos)) {
+                cout << "ERROR: El programa debe iniciar con la palabra 'program'." << endl;
+                return;
+            }
             
-            // WORKS (⊙_⊙;)
-            bool flag = false;
-            programOpener(datos, flag);
-            if (flag) { cout << "ERROR: eL programa debe iniciar con la palabra 'program' "; return; }
-            // WORKS (⊙_⊙;)
+            int iterator = 0;
+            vector<string> temp_vector;
+            
+            while(iterator < datos.size()){
+                
+                if (!lineaLeida(datos, temp_vector, iterator)) {
+                    return;
+                }
+
+                temp_vector.clear();
+            }
 
             /*int countId = std::count(identifiers.begin(), identifiers.end(), datos);
             if (countId > 0) {
@@ -25,26 +36,26 @@ class Syntax{
 
         };
 
-
-        void temp_lines(vector<string> &datos){
-            
+        bool lineaLeida(const vector<string>& datos, vector<string>& temp, int& i) {
+            while (i < datos.size() && datos[i] != ";") {
+                temp.push_back(datos[i]);
+                i++;
+            }
+            if (i < datos.size() && datos[i] == ";") {
+                temp.push_back(datos[i]);
+                i++;
+                return true; 
+            } else {
+                cout << "ERROR: Falta de ';' en la linea." << endl;
+                return false;
+            }
         }
 
-        void programOpener(vector<string> &datos, bool& flag) {
-
-            if (datos.empty()) {
-                throw runtime_error("ERROR: el programa esta vacío.");
+        bool programOpener(const vector<string>& datos) {
+            if (datos.empty() || datos[0] != "program") {
+                return false; // No comienza con "program"
             }
-            
-            string temp_word = datos[0];
-            transform(temp_word.begin(), temp_word.end(), temp_word.begin(), ::tolower);
-
-            if(temp_word != "program") {
-                flag = true;
-                return;
-            }
-
-            return;
+            return true;
         }
 
         void getsyntaxvar(vector<string> &datos)

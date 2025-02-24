@@ -205,37 +205,37 @@ class Syntax{
     
         // 1.- Verificamos que este el for
         if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "for")) {
-            cout << "ERROR: Falta la palabra reservada 'for'" << endl;
+            cout << "ERROR: Hay un error en el bucle for'" << endl;
             return false;
         }
     
         // 2.- Verificamos que este el identificador
         if (!skipWhiteSpace(datos, i) || !isIdentifier(datos, i)) {
-            cout << "ERROR: Falta el identificador // variable" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     
         // 3.- Verificamos que este el operador de asignacion
         if (!skipWhiteSpace(datos, i) || !matchOperator(datos, i, ":=")) {
-            cout << "ERROR: Falta el operador de asignacion ':='" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     
         // 4.- Verificamos que existe el valor inicial (el numero pana)
         if (!skipWhiteSpace(datos, i) || !isNumber(datos, i)) {
-            cout << "ERROR: Falta el valor inicial" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     
         // 5.- Verificamos que no haya un punto y coma después del valor inicial
         if (skipWhiteSpace(datos, i) && matchOperator(datos, i, ";")) {
-            cout << "ERROR: No se permite un punto y coma despues del valor inicial." << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     
         // 6.- Verificamos que esten las palabras reservadas "to" o "downto"
         if (!skipWhiteSpace(datos, i)) {
-            cout << "ERROR: Falta la palabra reservada 'to' o 'downto'" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     
@@ -243,37 +243,37 @@ class Syntax{
         bool isDownTo = matchKeyword(datos, i, "downto");
     
         if (!isTo && !isDownTo) {
-            cout << "ERROR: Falta la palabra reservada 'to' o 'downto'" << endl;
+            cout << "ERROR: Hay un error en el bucle for'" << endl;
             return false;
         }
     
         // 7.- Verificamos que exista el valor final (otro numero)
         if (!skipWhiteSpace(datos, i) || !isNumber(datos, i)) {
-            cout << "ERROR: Falta el valor final" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     
         // 8.- Verificamos que no haya un punto y coma después del valor final
         if (skipWhiteSpace(datos, i) && matchOperator(datos, i, ";")) {
-            cout << "ERROR: No se permite un punto y coma despues del valor final." << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     
         // 9.- Verificamos el do
         if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "do")) {
-            cout << "ERROR: Falta la palabra reservada 'do'" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     
         // 10.- Verificamos que no haya un punto y coma después del do
         if (skipWhiteSpace(datos, i) && matchOperator(datos, i, ";")) {
-            cout << "ERROR: No puede haber un ; despues del 'do'" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     
         // 11.- Verificamos que el cuerpo del bucle esté dentro de un bloque "begin ... end"
         if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "begin")) {
-            cout << "ERROR: Falta 'begin' en el cuerpo del bucle 'for'." << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
     

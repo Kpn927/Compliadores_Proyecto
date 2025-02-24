@@ -18,7 +18,7 @@ begin
         x = x + 2;
     end;
     
-    for i := 0;  to 150; do
+    for  := 0;  to 150 
     begin
         x := x + 1;
         writeln(x);

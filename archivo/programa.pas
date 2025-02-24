@@ -9,19 +9,7 @@ begin
 /* Esto si deberia aparecer */
 
 
-for i := 0; to 150; do
-    begin
-        x := x + 1;
-        writeln(x);
-    end;
-
-for i := 0; downto 150; do
-    begin
-        x := x + 1;
-        writeln(x);
-    end;
-
-for i := 0; to 150; do;
+for i := 0 to 150 do
     begin
         x := x + 1;
         writeln(x);

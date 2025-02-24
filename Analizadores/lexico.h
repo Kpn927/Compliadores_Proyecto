@@ -20,12 +20,14 @@ enum class Tokens {
     NUMBER
 };
 
-vector<string> reserved = {"if", "then", "to", "do", "writeln", "readln"};
+vector<string> reserved = {"if", "then", "to", "do", "downto", "writeln", "readln"};
 vector<string> operators = {"+", "-", "*", "/", ":=", "=", ">", "<", ">=", "<=", "==", "!=", "++",":"};
 vector<string> dataType = {"integer", "real", "character", "array", "boolean", "double"};
 vector<string> identifiers = {"var", "const", "procedure", "function", "begin", "end", "program"};
-vector<string> variables = {"x", "i", "j", "y"};
+vector<string> variables = {};
 vector<string> delimiters = {"(", ")", ";",  ",", ".", "{", "}"};
+vector<string> symbols = {":=",":","(", ")", ";",  ",", ".", "{", "}", "+", "-", "*", "/", "=", ">", "<", ">=", "<=", "==", "!=", "++"};
+
 
 void show_vector(const vector<string>& v);
 void PrintingTokens(const vector<string>& v);

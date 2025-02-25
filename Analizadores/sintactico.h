@@ -9,25 +9,31 @@
 class Syntax{
     public:
     Syntax(){};
-    void getsyntax(vector<string> &datos) {
+
+    void getSyntax(vector<string> &datos) {
             
         if (datos.empty() || datos[0] != identifiers[6]) {
             cout << "ERROR: Falta o esta escrito mal la palabra program'";
             return;
         }
         
-        int finalNumber = 3, initialNumber = 0;
+        int finalNumber = 59, initialNumber = 0;
         
         lineaLeida(datos, finalNumber, initialNumber);
 
         if (datos[initialNumber] == identifiers[0])
         {
-            getsyntaxvar(datos, symbols, initialNumber, finalNumber);
+            getSyntaxVar(datos, symbols, initialNumber, finalNumber);
             
         } else if (datos[initialNumber] == identifiers[4])
         {
             // getsyntaxbegin
-        }      
+        }
+        int i = 0;
+        while (i<variables.size()){
+            if (datos[initialNumber] == variables[i]) getSyntaxAsignation(datos,symbols, initialNumber, finalNumber);
+            i++;
+        }
     };
     
     // WORKS (⊙_⊙;)
@@ -80,7 +86,7 @@ class Syntax{
         return;
     }
 
-    void getsyntaxvar(vector<string> &datos, vector<string> &symbols, int initial, int final) {
+    void getSyntaxVar(vector<string> &datos, vector<string> &symbols, int initial, int final) {
         Tree<string> arbolvar;
         
         initial++;
@@ -163,6 +169,82 @@ class Syntax{
                     return;
                 }    
             }
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+    }
+
+    bool isNumber(string word){
+        for (char c : word) {
+            if (!isdigit(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int initial, int final) {
+        Tree<string> arbolvar;
+        
+        arbolvar.insertarOrdenado("",0);
+        
+        recursiveTree(arbolvar, datos, initial, final);
+        
+        arbolvar.orden(arbolvar.getRaiz(), true);
+
+        Node<string> *a = arbolvar.getRaiz()->getRight();
+        Node<string> *b = arbolvar.getRaiz()->getLeft();
+
+        try
+        {
+            bool flag = true;
+
+            for (int i = 0; i < variables.size(); i++)
+            {
+                if (b->getValue() == variables[i])
+                {
+                    flag = false;
+                } 
+            }
+
+            if (flag)
+            {
+                cout << endl << "ERROR: NO PUSISTE UNA FOKIN VARIABLE" << endl;
+            }
+            
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
+
+        try
+        {
+            bool left = false;
+            bool right = false;
+            while (a->getRight() != NULL)
+            {    
+                left = isNumber(a->getLeft()->getValue());
+                right = isNumber(a->getRight()->getValue());
+                if (!right && a->getRight()->getValue() == "") right=true;
+                if(!(left && right)){
+                    for (int i = 0; i < variables.size(); i++)
+                    {
+                        if (variables[i] == a->getLeft()->getValue()) left = true;
+                        if (variables[i] == a->getRight()->getValue()) right = true;     
+                    }
+                }
+                if (!(left && right))
+                {
+                    cout<<"ERROR: NO PUSISTE BIEN LA ASIGNACION DE VARIABLE"<<endl;
+                    return;
+                }
+                a = a->getRight();
+            }
+            cout<<"Todo bien"<<endl;
         }
         catch(const std::exception& e)
         {

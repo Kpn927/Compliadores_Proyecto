@@ -34,7 +34,7 @@ int main() {
             
     }
     
-    sintactico.getsyntax(tokens);
+    sintactico.getSyntax(tokens);
 
     return 0;
 }

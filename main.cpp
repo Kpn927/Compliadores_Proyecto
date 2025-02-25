@@ -25,14 +25,10 @@ int main() {
     
     sintactico.CommentAnalizer(datos);
     string forsito = sintactico.extractBlock(datos);
-    //cout << forsito << "<- el for" << endl;
     if (forsito.empty()) {
-        cout << "No hay for que triste" << endl;
-    } else {
-        cout << forsito << "<- el for" << endl;
-        sintactico.forAnalizer(forsito);
-            
+        cout << "No hay bucle for que triste" << endl;
     }
+    sintactico.forAnalizer(forsito);
     
     sintactico.getSyntax(tokens);
 

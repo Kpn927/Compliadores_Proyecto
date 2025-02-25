@@ -284,55 +284,92 @@ class Syntax{
 
     bool forAnalizer(const string& datos) {
         size_t i = 0;
-        
+    
         // 1.- Verificamos que este el for
         if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "for")) {
-            cout << "ERROR: Falta la palabra reservada 'for'" << endl;
+            cout << "ERROR: Hay un error en el bucle for'" << endl;
             return false;
         }
+    
         // 2.- Verificamos que este el identificador
         if (!skipWhiteSpace(datos, i) || !isIdentifier(datos, i)) {
-            cout << "ERROR: Falta el identificador // variable" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
+    
         // 3.- Verificamos que este el operador de asignacion
         if (!skipWhiteSpace(datos, i) || !matchOperator(datos, i, ":=")) {
-            cout << "ERROR: Falta el operador de asignacion ':='" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
+    
         // 4.- Verificamos que existe el valor inicial (el numero pana)
         if (!skipWhiteSpace(datos, i) || !isNumber(datos, i)) {
-            cout << "ERROR: Falta el valor inicial" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
-        // 5.- Verificamos que esten as palabras reservadas "to" 
-        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "to")) {
-            cout << "ERROR: Falta la palabra reservada to" << endl;
+    
+        // 5.- Verificamos que no haya un punto y coma después del valor inicial
+        if (skipWhiteSpace(datos, i) && matchOperator(datos, i, ";")) {
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
-        // 5.b - downto
-        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "downto")) {
-            cout << "ERROR: Falta la palabra reservada 'downto'" << endl;
+    
+        // 6.- Verificamos que esten las palabras reservadas "to" o "downto"
+        if (!skipWhiteSpace(datos, i)) {
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
-        // 6.- Verificamos que exista el valor final (otro numero)
+    
+        bool isTo = matchKeyword(datos, i, "to");
+        bool isDownTo = matchKeyword(datos, i, "downto");
+    
+        if (!isTo && !isDownTo) {
+            cout << "ERROR: Hay un error en el bucle for'" << endl;
+            return false;
+        }
+    
+        // 7.- Verificamos que exista el valor final (otro numero)
         if (!skipWhiteSpace(datos, i) || !isNumber(datos, i)) {
-            cout << "ERROR: Falta el valor final" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
-        // 7.- Verificamos el do
+    
+        // 8.- Verificamos que no haya un punto y coma después del valor final
+        if (skipWhiteSpace(datos, i) && matchOperator(datos, i, ";")) {
+            cout << "ERROR: Hay un error en el bucle for" << endl;
+            return false;
+        }
+    
+        // 9.- Verificamos el do
         if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "do")) {
-            cout << "ERROR: Falta la palabra reservada 'do'" << endl;
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
-        // 8.- Si hay un " ; " despues del do esta malo asi que ERROR
-        if (!skipWhiteSpace(datos, i) || matchOperator(datos, i, ";")) {
-            cout << "ERROR: No puede haber un ; despues del 'do'" << endl;
+    
+        // 10.- Verificamos que no haya un punto y coma después del do
+        if (skipWhiteSpace(datos, i) && matchOperator(datos, i, ";")) {
+            cout << "ERROR: Hay un error en el bucle for" << endl;
             return false;
         }
+    
+        // 11.- Verificamos que el cuerpo del bucle esté dentro de un bloque "begin ... end"
+        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "begin")) {
+            cout << "ERROR: Hay un error en el bucle for" << endl;
+            return false;
+        }
+    
+        // // Buscamos el "end" que cierra el bloque
+        // while (i < datos.length() && !matchKeyword(datos, i, "end")) {
+        //     i++;
+        // }
+        // if (i >= datos.length()) {
+        //     cout << "ERROR: Falta 'end' para cerrar el cuerpo del bucle 'for'." << endl;
+        //     return false;
+        // }
+    
         return true;
-    };
-
+    }
     // Extraemos el bloque del bucle for por que aja, cosas
     string extractBlock(const string& datos) {
         size_t start = datos.find("for");

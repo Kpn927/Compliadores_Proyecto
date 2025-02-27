@@ -17,22 +17,28 @@ class Syntax{
             return;
         }
         
-        int finalNumber = 59, initialNumber = 0;
-        
-        lineaLeida(datos, finalNumber, initialNumber);
-
-        if (datos[initialNumber] == identifiers[0])
-        {
-            getSyntaxVar(datos, symbols, initialNumber, finalNumber);
-            
-        } else if (datos[initialNumber] == identifiers[4])
-        {
-            // getsyntaxbegin
-        }
-        int i = 0;
-        while (i<variables.size()){
-            if (datos[initialNumber] == variables[i]) getSyntaxAsignation(datos,symbols, initialNumber, finalNumber);
-            i++;
+        int finalNumber = 3, initialNumber = 0;
+        bool final = true;
+        while (final){
+            if (datos[initialNumber]=="end" && datos[initialNumber+1]=="."){
+                cout<<"Codigo terminado";
+                return;
+            }
+            lineaLeida(datos, finalNumber, initialNumber);
+    
+            if (datos[initialNumber] == identifiers[0])
+            {
+                getSyntaxVar(datos, symbols, initialNumber, finalNumber);
+                
+            } else if (datos[initialNumber] == identifiers[4])
+            {
+                // getsyntaxbegin
+            }
+            int i = 0;
+            while (i<variables.size()){
+                if (datos[initialNumber] == variables[i]) getSyntaxAsignation(datos,symbols, initialNumber, finalNumber);
+                i++;
+            }   
         }
     };
     
@@ -271,7 +277,7 @@ class Syntax{
                 //multiLineStart = i;
                 i += 2;
             } else if (multiLine && datos.substr(i, 2) == "*/") {
-                multiLine = false;
+                multiLine = true;
                 i += 2;
             } else if (multiLine && i == datos.length() - 1) {
                 cout << "ERROR: Comentario Multilineal no cerrado" << endl;
@@ -367,7 +373,6 @@ class Syntax{
         //     cout << "ERROR: Falta 'end' para cerrar el cuerpo del bucle 'for'." << endl;
         //     return false;
         // }
-    
         return true;
     }
     // Extraemos el bloque del bucle for por que aja, cosas
@@ -449,32 +454,42 @@ class Syntax{
         size_t i = 0;
 
         if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "if")) {
-            cout << "ERROR: Hay un error en el bucle for (el if)" << endl;
+            cout << "ERROR: Hay un error en el if (el if)" << endl;
             return false;
         }
         // Condicion
         if (!skipWhiteSpace(datos, i) || !isIdentifier(datos, i)) {
-            cout << "ERROR: Hay un error en el bucle for (la condicion)" << endl;
+            cout << "ERROR: Hay un error en el if (la condicion)" << endl;
             return false;
         }
 
         if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "then")) {
-            cout << "ERROR: Hay un error en el bucle for (no hay then)" << endl;
+            cout << "ERROR: Hay un error en el if (no hay then)" << endl;
+            return false;
+        }
+
+        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "begin")){
+            cout << "ERROR: Hay un error en el if (no hay begin)" << endl;
             return false;
         }
 
         if (!skipWhiteSpace(datos, i) || !isBlock(datos, i)) {
-            cout << "ERROR: Hay un error en el bucle for (mal bloque)" << endl;
+            cout << "ERROR: Hay un error en el if (mal bloque)" << endl;
             return false;
         }
+        
 
         if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "else")) {
             if (!skipWhiteSpace(datos, i) || !isBlock(datos, i)) {
-                cout << "ERROR: Hay un error en el bucle for (el bloque dentro del else)" << endl;
+                cout << "ERROR: Hay un error en el if (el bloque dentro del else)" << endl;
                 return false;
             }
         }
-        cout << "Todo esta bien en el if";
+        // if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "end")){
+        //     cout << "ERROR: Hay un error en el if (no hay end)" << endl;
+        //     return false;
+        // }
+        //cout << "Todo esta bien en el if \n";
         return true;
     }
 

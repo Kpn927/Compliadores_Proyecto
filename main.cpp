@@ -21,10 +21,18 @@ int main() {
     //PrintingTokens(tokens);
     Syntax sintactico;
 
-    string code = "if x then begin x := x + 1; end else begin x := x - 1; end;";
+    // BEGIN TESTING
+    string code = "if x then begin x := x + 1; end;";
     sintactico.ifAnalizer(code);
+
+    string code2 = "for i := 0 to 150 do begin x := x + 1; writeln(x); ";
+    sintactico.forAnalizer(code2);
+
+    string code3 = "/* Comentario */";
+    sintactico.CommentAnalizer(code3);
+    // END TESTING
     
-    sintactico.CommentAnalizer(datos);
+    //sintactico.CommentAnalizer(datos);
     string forsito = sintactico.extractBlock(datos);
     if (forsito.empty()) {
         cout << "No hay bucle for que triste" << endl;

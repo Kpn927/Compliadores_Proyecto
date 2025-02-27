@@ -1,12 +1,12 @@
 program Hola;
 var 
-    x,y,z,po,culo,webo:integer;
+    x,y,z:integer;
     z:float;
 begin
 
 // Hola, esto no deberia aparecer
 /* Hola, esto tampoco deberia aparecer */
-/* Esto si deberia aparecer */
+/* Esto si deberia aparecer
 
 
 for i := 0 to 150 do
@@ -14,3 +14,4 @@ for i := 0 to 150 do
         x := x + 1;
         writeln(x);
     end;
+end.

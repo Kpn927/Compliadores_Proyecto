@@ -444,5 +444,61 @@ class Syntax{
         } 
         return false;
     }
+
+    bool ifAnalizer(const string& datos) {
+        size_t i = 0;
+
+        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "if")) {
+            cout << "ERROR: Hay un error en el bucle for (el if)" << endl;
+            return false;
+        }
+        // Condicion
+        if (!skipWhiteSpace(datos, i) || !isIdentifier(datos, i)) {
+            cout << "ERROR: Hay un error en el bucle for (la condicion)" << endl;
+            return false;
+        }
+
+        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "then")) {
+            cout << "ERROR: Hay un error en el bucle for (no hay then)" << endl;
+            return false;
+        }
+
+        if (!skipWhiteSpace(datos, i) || !isBlock(datos, i)) {
+            cout << "ERROR: Hay un error en el bucle for (mal bloque)" << endl;
+            return false;
+        }
+
+        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "else")) {
+            if (!skipWhiteSpace(datos, i) || !isBlock(datos, i)) {
+                cout << "ERROR: Hay un error en el bucle for (el bloque dentro del else)" << endl;
+                return false;
+            }
+        }
+        cout << "Todo esta bien en el if";
+        return true;
+    }
+
+    bool isBlock(const string& datos, size_t& i) {
+        if (matchKeyword(datos, i, "begin")) {
+            int count = 1;
+            while (i < datos.length() && count > 0) {
+                if (matchKeyword(datos, i, "begin")) {
+                    count++;
+                } else if (matchKeyword(datos, i, "end")) {
+                    count--;
+                } else {
+                    i++;
+                }
+            }
+            return count == 0;
+        } else {
+            while (i < datos.length() && datos[i] != ';') {
+                i++;
+            }
+            return true;
+        }
+    } 
+
+    
 };
 

@@ -21,7 +21,8 @@ int main() {
     //PrintingTokens(tokens);
     Syntax sintactico;
 
-
+    string code = "if x then begin x := x + 1; end else begin x := x - 1; end;";
+    sintactico.ifAnalizer(code);
     
     sintactico.CommentAnalizer(datos);
     string forsito = sintactico.extractBlock(datos);

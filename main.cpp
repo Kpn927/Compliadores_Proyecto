@@ -23,7 +23,7 @@ int main() {
 
     // BEGIN TESTING
     // if x then begin x := x + 1; end;
-    vector<string> code = {"i", "f", "x", "t", "h", "e", "n"};
+    /*vector<string> code = {"i", "f", "x", "t", "h", "e", "n"};
     int ifanalizer = sintactico.ifAnalizer(code);
     
     // for i := 0 to 150 do begin x := x + 1; writeln(x); end;
@@ -40,7 +40,7 @@ int main() {
     // if (forsito.empty()) {
     //     cout << "No hay bucle for que triste" << endl;
     // }
-    // sintactico.forAnalizer(forsito);
+    // sintactico.forAnalizer(forsito);*/
     
     sintactico.getSyntax(tokens);
 

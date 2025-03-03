@@ -1,7 +1,7 @@
 program Hola;
 var 
     x,y,z:integer;
-    z:float;
+    ELPEPEMAGICO:double;
 begin
 
 // Hola, esto no deberia aparecer

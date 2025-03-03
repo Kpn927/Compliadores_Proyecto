@@ -11,54 +11,59 @@ class Syntax{
     Syntax(){};
 
     void getSyntax(vector<string> &datos) {
-            
+
+        std::ios::sync_with_stdio(false);
+
         if (datos.empty() || datos[0] != identifiers[6]) {
             cout << "ERROR: Falta o esta escrito mal la palabra program'";
             return;
         }
         
         int finalNumber = 3, initialNumber = 0;
-        bool final = true;
-        while (final){
-            if (datos[initialNumber]=="end" && datos[initialNumber+1]=="."){
-                cout<<"Codigo terminado";
+        bool final = true, flag_begin = true;
+
+        while (final) {
+            /* MANEJO DE NUMEROS INICIALES Y FINALES */   
+            initialNumber = finalNumber;
+            
+            while (finalNumber < datos.size() && datos[finalNumber + 1] != ";") {
+                finalNumber++;
+            }
+
+            if (datos[initialNumber] == "end" && datos[initialNumber + 1] == ".") {
+                cout << endl << "Codigo terminado";
                 return;
             }
-            lineaLeida(datos, finalNumber, initialNumber);
-    
-            if (datos[initialNumber] == identifiers[0])
-            {
-                getSyntaxVar(datos, symbols, initialNumber, finalNumber);
-                
-            } else if (datos[initialNumber] == identifiers[4])
-            {
+            
+            if (datos[initialNumber] == identifiers[4]) {
                 // getsyntaxbegin
+                if (flag_begin) {
+                    flag_begin = false;
+                }
             }
+            
+            if (flag_begin)
+            {
+                if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
+                    getSyntaxVar(datos, symbols, initialNumber, finalNumber);
+                }
+            }
+
             int i = 0;
-            while (i<variables.size()){
-                if (datos[initialNumber] == variables[i]) getSyntaxAsignation(datos,symbols, initialNumber, finalNumber);
+
+            while (i < variables.size()) {
+                if (datos[initialNumber] == variables[i]) {
+                    getSyntaxAsignation(datos, symbols, initialNumber, finalNumber);
+                    break;
+                }
                 i++;
-            }   
+            }
+
+            /* SIGUIENTE LINEA. */
+            initialNumber = finalNumber + 2;
+            finalNumber = initialNumber;
         }
     };
-    
-    // WORKS (⊙_⊙;)
-    void lineaLeida(const vector<string>& datos, int& i, int& initial) {
-        
-        if (initial != 0) {
-            i+=2;
-            initial += 2;
-        }
-
-        initial = i;
-        
-        while (i < datos.size() && datos[i] != ";") {
-            i++;
-        }
-        if (i > initial) {
-            i--;
-        }
-    }
 
     void recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<string> &datos, int initialNumber, int finalNumber){
         // detectar separador
@@ -93,17 +98,36 @@ class Syntax{
     }
 
     void getSyntaxVar(vector<string> &datos, vector<string> &symbols, int initial, int final) {
+        
         Tree<string> arbolvar;
+
+        if (datos[initial] == identifiers[0])
+        {
+            initial++;
+        }
         
-        initial++;
         arbolvar.insertarOrdenado("",0);
-        
+
         recursiveTree(arbolvar, datos, initial, final);
-        
+
         arbolvar.orden(arbolvar.getRaiz(), true);
 
         Node<string> *a = arbolvar.getRaiz()->getLeft();
         Node<string> *b = arbolvar.getRaiz()->getRight();
+
+        if (a->getValue() != "")
+        {
+            for (int i = 0; i < variables.size(); i++)
+            {
+                if (variables[i] == a->getValue())
+                {
+                    cout << "ERROR: VARIABLE DOBLEMENTE DECLARADA." << endl;
+                    exit(1);
+                }                    
+            }
+            variables.push_back(a->getValue());
+        }
+        
 
         try
         {
@@ -116,10 +140,9 @@ class Syntax{
                     flag = false;
                 } 
             }
-
             if (flag)
             {
-                cout << endl << "ERROR: EN LA DECLARACION DEL FOKIN VARIABLE. " << endl;
+                cout << endl << "ERROR: EN LA DECLARACION DEL DATATYPE VARIABLE. " << endl;
             }
             
         }
@@ -128,6 +151,7 @@ class Syntax{
             std::cerr << e.what() << '\n';
         }
         
+
 
         try
         {
@@ -141,6 +165,7 @@ class Syntax{
                         flag = false;
                     }                    
                 }
+                
                 if (flag)
                 {
                     for (int i = 0; i < identifiers.size(); i++)
@@ -151,6 +176,7 @@ class Syntax{
                         }                    
                     }
                 }
+                
                 if (flag)
                 {
                     for (int i = 0; i < dataType.size(); i++)
@@ -161,15 +187,30 @@ class Syntax{
                         }                    
                     }
                 }
-
+                
                 if (flag)
+                {
+                    for (int i = 0; i < variables.size(); i++)
+                    {
+                        if ((variables[i] == a->getLeft()->getValue()) || (variables[i] == a->getRight()->getValue()))
+                        {
+                            flag = false;
+                            cout << "ERROR: VARIABLE YA DECLARADA." << endl;
+                            exit(1);
+                        }                    
+                    }
+                }
+
+                if (flag)  
                 {
                     variables.push_back(a->getLeft()->getValue());
                     a = a->getRight();
+
                     if (a->getValue() != "")
-                    {
+                    {   
                         variables.push_back(a->getValue());
                     }
+                    
                 } else {
                     cout << endl <<"ERROR: HP ARBOL HAY UNA FOKIN PALABRA RESERVADA" << endl;
                     return;
@@ -198,7 +239,7 @@ class Syntax{
         
         recursiveTree(arbolvar, datos, initial, final);
         
-        arbolvar.orden(arbolvar.getRaiz(), true);
+        // arbolvar.orden(arbolvar.getRaiz(), true);
 
         Node<string> *a = arbolvar.getRaiz()->getRight();
         Node<string> *b = arbolvar.getRaiz()->getLeft();
@@ -250,7 +291,6 @@ class Syntax{
                 }
                 a = a->getRight();
             }
-            cout<<"Todo bien"<<endl;
         }
         catch(const std::exception& e)
         {

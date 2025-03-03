@@ -258,262 +258,161 @@ class Syntax{
         }
     }
     
-    void CommentAnalizer(const string& datos) {
+    // Faltaria la logica del // para ver como terminariamos la linea
+    void CommentAnalizer(const vector<string>& datos) {
         size_t i = 0;
         bool multiLine = false;
-        //size_t multiLineStart = 0;
 
-        while (i < datos.length()) {
-            if (!multiLine && datos.substr(i, 2) == "//") { // Comentario de una Linea
-                i += 2; // Saltamos por que no nos importa tbh
-                while (i < datos.length() && datos[i] != '\n') { // nos vamos al salto de linea
-                    i++;
-                } 
-                if (i < datos.length() && datos[i] == '\n') { // saltamos el salto de linea
+        while (i < datos.size()) {
+            if (!multiLine && i + 1 < datos.size() && datos[i] == "/" && datos[i + 1] == "/") { // Single-line comment
+                i += 2; // Skip "//"
+                while (i < datos.size() && datos[i] != "\n") { // Go to the end of the line
                     i++;
                 }
-            } else if (!multiLine && datos.substr(i, 2) == "/*") { // Empezamos con los comentarios multilineales
+                if (i < datos.size() && datos[i] == "\n") { // Skip the newline
+                    i++;
+                }
+            } else if (!multiLine && i + 1 < datos.size() && datos[i] == "(" && datos[i + 1] == "*") { // Start of multi-line comment
                 multiLine = true;
-                //multiLineStart = i;
                 i += 2;
-            } else if (multiLine && datos.substr(i, 2) == "*/") {
-                multiLine = true;
+            } else if (multiLine && i + 1 < datos.size() && datos[i] == "*" && datos[i + 1] == ")") { // End of multi-line comment
+                multiLine = false;
                 i += 2;
-            } else if (multiLine && i == datos.length() - 1) {
+            } else if (multiLine && i == datos.size() - 1) {
                 cout << "ERROR: Comentario Multilineal no cerrado" << endl;
                 break;
             } else {
                 i++;
             }
         }
-    };
+    }
 
-    bool forAnalizer(const string& datos) {
+    int forAnalizer(const vector<string>& datos) {
         size_t i = 0;
     
-        // 1.- Verificamos que este el for
-        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "for")) {
-            cout << "ERROR: Hay un error en el bucle for'" << endl;
-            return false;
+        // 1.- Check for "for"
+        if (!matchKeyword(datos, i, {"f", "o", "r"})) {
+            cout << "ERROR: Hay un error en el bucle for (no hay for)" << endl;
+            return -1;
+        }    
+        // 2.- Check for identifier
+        if (!isIdentifier(datos, i)) {
+            cout << "ERROR: Hay un error en el bucle for (no hay identificador)" << endl;
+            return -1;
         }
-    
-        // 2.- Verificamos que este el identificador
-        if (!skipWhiteSpace(datos, i) || !isIdentifier(datos, i)) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
+            
+        // 3.- Check for assignment operator ":="
+        if (!matchOperator(datos, i, {":", "="})) {
+            cout << "ERROR: Hay un error en el bucle for (no hay :=)" << endl;
+            return -1;
         }
-    
-        // 3.- Verificamos que este el operador de asignacion
-        if (!skipWhiteSpace(datos, i) || !matchOperator(datos, i, ":=")) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
+        
+        // 4.- Check for initial value (number)
+        if (!isNumber(datos, i)) {
+            cout << "ERROR: Hay un error en el bucle for (valor inicial no es un numero)" << endl;
+            return -1;
         }
-    
-        // 4.- Verificamos que existe el valor inicial (el numero pana)
-        if (!skipWhiteSpace(datos, i) || !isNumber(datos, i)) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
-        }
-    
-        // 5.- Verificamos que no haya un punto y coma después del valor inicial
-        if (skipWhiteSpace(datos, i) && matchOperator(datos, i, ";")) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
-        }
-    
-        // 6.- Verificamos que esten las palabras reservadas "to" o "downto"
-        if (!skipWhiteSpace(datos, i)) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
-        }
-    
-        bool isTo = matchKeyword(datos, i, "to");
-        bool isDownTo = matchKeyword(datos, i, "downto");
+        
+        // 5.- Check for "to" or "downto"
+        bool isTo = matchKeyword(datos, i, {"t", "o"});
+        bool isDownTo = matchKeyword(datos, i, {"d", "o", "w", "n", "t", "o"});
     
         if (!isTo && !isDownTo) {
-            cout << "ERROR: Hay un error en el bucle for'" << endl;
-            return false;
+            cout << "ERROR: Hay un error en el bucle for (no hay to/downto)" << endl;
+            return -1;
         }
-    
-        // 7.- Verificamos que exista el valor final (otro numero)
-        if (!skipWhiteSpace(datos, i) || !isNumber(datos, i)) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
+        
+        // 6.- Check for final value (number)
+        if (!isNumber(datos, i)) {
+            cout << "ERROR: Hay un error en el bucle for (valor final no es un numero)" << endl;
+            return -1;
         }
-    
-        // 8.- Verificamos que no haya un punto y coma después del valor final
-        if (skipWhiteSpace(datos, i) && matchOperator(datos, i, ";")) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
+        
+        // 7.- Check for "do"
+        if (!matchKeyword(datos, i, {"d", "o"})) {
+            cout << "ERROR: Hay un error en el bucle for (no hay do)" << endl;
+            return -1;
         }
-    
-        // 9.- Verificamos el do
-        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "do")) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
-        }
-    
-        // 10.- Verificamos que no haya un punto y coma después del do
-        if (skipWhiteSpace(datos, i) && matchOperator(datos, i, ";")) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
-        }
-    
-        // 11.- Verificamos que el cuerpo del bucle esté dentro de un bloque "begin ... end"
-        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "begin")) {
-            cout << "ERROR: Hay un error en el bucle for" << endl;
-            return false;
-        }
-    
-        // // Buscamos el "end" que cierra el bloque
-        // while (i < datos.length() && !matchKeyword(datos, i, "end")) {
-        //     i++;
-        // }
-        // if (i >= datos.length()) {
-        //     cout << "ERROR: Falta 'end' para cerrar el cuerpo del bucle 'for'." << endl;
-        //     return false;
-        // }
-        return true;
+        
+        // Return the index where the analysis ends
+        cout << "Analysis of 'for' statement ended at index: " << i << endl;
+        cout << "Last token analyzed: " << datos[i - 1] << endl;
+        return i;
     }
-    // Extraemos el bloque del bucle for por que aja, cosas
-    string extractBlock(const string& datos) {
-        size_t start = datos.find("for");
-        if (start == string::npos) {
-            return ""; // No hay for
+    
+    int ifAnalizer(const vector<string>& datos) {
+        size_t i = 0;
+    
+        if (!matchKeyword(datos, i, {"i", "f"})) {
+            cout << "ERROR: Hay un error en el if (no hay if)" << endl;
+            return -1;
         }
+    
+        // condition (identifier)
+        if (!isIdentifier(datos, i)) {
+            cout << "ERROR: Hay un error en el if (no hay identificador)" << endl;
+            return -1;
+        }
+    
+        // 3.- Check for "then"
+        if (!matchKeyword(datos, i, {"t", "h", "e", "n"})) {
+            cout << "ERROR: Hay un error en el if (no hay then)" << endl;
+            return -1;
+        }
+        
+        cout << "Analysis of 'if' statement ended at index: " << i << endl;
+        cout << "Last token analyzed: " << datos[i - 1] << endl;
+        return i;
+    }
 
-        size_t end = start;
-        int count = 0; // Contador para los bloques begin/end
-
-        while (end < datos.length()) {
-            if (datos.substr(end, 5) == "begin") {
-                count++;
-            } else if (datos.substr(end, 3) == "end") {
-                count--;
-                if (count == 0) {
-                    end += 3;
-                    break;
+    // Helper function to match a keyword in a vector<string>
+    bool matchKeyword(const vector<string>& datos, size_t& i, const vector<string>& keyword) {
+        if (i + keyword.size() <= datos.size()) {
+            for (size_t j = 0; j < keyword.size(); ++j) {
+                if (datos[i + j] != keyword[j]) {
+                    return false;
                 }
             }
-            end++;
-        }
-
-        if (end >= datos.length()) {
-            return ""; // No hay bloque 
-        }
-        return datos.substr(start, end - start);
-    }
-
-    bool skipWhiteSpace(const string& datos, size_t& i) {
-        while (i < datos.length() && isspace(datos[i])) {
-            i++;
-        }
-        return i < datos.length();
-    };
-    // coincide con palabra "x"
-    bool matchKeyword(const string& datos, size_t& i, const string& keyword) {
-        if (datos.substr(i, keyword.length()) == keyword) {
-            i += keyword.length();
+            i += keyword.size();
             return true;
         }
         return false;
-    };
-
-    bool isIdentifier(const string& datos, size_t& i) {
-        if (i >= datos.length() || !isalpha(datos[i])) {
-            return false;
-        }
-        i++;
-        while (i < datos.length() && isalnum(datos[i])) {
-            i++;
-        }
-        return true;
-    };
-
-    bool isNumber(const string& datos, size_t& i) {
-        if (i >= datos.length() || !isdigit(datos[i])) {
-            return false;
-        }
-        
-        i++;
-        while (i < datos.length() && isdigit(datos[i])) {
-            i++;
-        }
-        return true;
-    };
-    
-    bool matchOperator(const string& datos, size_t &i, const string& op) {
-        if (datos.substr(i, op.length()) == op) {
-            i += op.length();
-            return true;
-        } 
-        return false;
     }
 
-    bool ifAnalizer(const string& datos) {
-        size_t i = 0;
-
-        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "if")) {
-            cout << "ERROR: Hay un error en el if (el if)" << endl;
+    // Helper function to check if a token is an identifier
+    bool isIdentifier(const vector<string>& datos, size_t& i) {
+        if (i >= datos.size() || datos[i].empty() || !isalpha(datos[i][0])) {
             return false;
         }
-        // Condicion
-        if (!skipWhiteSpace(datos, i) || !isIdentifier(datos, i)) {
-            cout << "ERROR: Hay un error en el if (la condicion)" << endl;
+        i++;
+        return true;
+    }
+
+    bool isNumber(const vector<string>& datos, size_t& i) {
+        if (i >= datos.size() || datos[i].empty()) {
             return false;
         }
-
-        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "then")) {
-            cout << "ERROR: Hay un error en el if (no hay then)" << endl;
-            return false;
-        }
-
-        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "begin")){
-            cout << "ERROR: Hay un error en el if (no hay begin)" << endl;
-            return false;
-        }
-
-        if (!skipWhiteSpace(datos, i) || !isBlock(datos, i)) {
-            cout << "ERROR: Hay un error en el if (mal bloque)" << endl;
-            return false;
-        }
-        
-
-        if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "else")) {
-            if (!skipWhiteSpace(datos, i) || !isBlock(datos, i)) {
-                cout << "ERROR: Hay un error en el if (el bloque dentro del else)" << endl;
+        for (char c : datos[i]) {
+            if (!isdigit(c)) {
                 return false;
             }
         }
-        // if (!skipWhiteSpace(datos, i) || !matchKeyword(datos, i, "end")){
-        //     cout << "ERROR: Hay un error en el if (no hay end)" << endl;
-        //     return false;
-        // }
-        //cout << "Todo esta bien en el if \n";
+        i++;
         return true;
     }
 
-    bool isBlock(const string& datos, size_t& i) {
-        if (matchKeyword(datos, i, "begin")) {
-            int count = 1;
-            while (i < datos.length() && count > 0) {
-                if (matchKeyword(datos, i, "begin")) {
-                    count++;
-                } else if (matchKeyword(datos, i, "end")) {
-                    count--;
-                } else {
-                    i++;
+    bool matchOperator(const vector<string>& datos, size_t& i, const vector<string>& op) {
+        if (i + op.size() <= datos.size()) {
+            for (size_t j = 0; j < op.size(); ++j) {
+                if (datos[i + j] != op[j]) {
+                    return false;
                 }
             }
-            return count == 0;
-        } else {
-            while (i < datos.length() && datos[i] != ';') {
-                i++;
-            }
+            i += op.size();
             return true;
         }
-    } 
-
+        return false;
+    }
     
 };
 

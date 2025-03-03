@@ -22,22 +22,25 @@ int main() {
     Syntax sintactico;
 
     // BEGIN TESTING
-    string code = "if x then begin x := x + 1; end;";
-    sintactico.ifAnalizer(code);
+    // if x then begin x := x + 1; end;
+    vector<string> code = {"i", "f", "x", "t", "h", "e", "n"};
+    int ifanalizer = sintactico.ifAnalizer(code);
+    
+    // for i := 0 to 150 do begin x := x + 1; writeln(x); end;
+    vector<string> code2 = {"f", "o", "r", "i", ":", "=", "0", "t", "o", "150", "d", "o"};
+    int analizer = sintactico.forAnalizer(code2);
+    
 
-    string code2 = "for i := 0 to 150 do begin x := x + 1; writeln(x); ";
-    sintactico.forAnalizer(code2);
-
-    string code3 = "/* Comentario */";
+    vector<string> code3 = {"/* Comentario"};
     sintactico.CommentAnalizer(code3);
     // END TESTING
     
     //sintactico.CommentAnalizer(datos);
-    string forsito = sintactico.extractBlock(datos);
-    if (forsito.empty()) {
-        cout << "No hay bucle for que triste" << endl;
-    }
-    sintactico.forAnalizer(forsito);
+    // vector<string> forsito = sintactico.extractBlock(datos);
+    // if (forsito.empty()) {
+    //     cout << "No hay bucle for que triste" << endl;
+    // }
+    // sintactico.forAnalizer(forsito);
     
     sintactico.getSyntax(tokens);
 

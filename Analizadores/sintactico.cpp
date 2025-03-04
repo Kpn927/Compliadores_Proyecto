@@ -1,4 +1,5 @@
 #include "sintactico.h"
+#include "verificaciones.h"
 Syntax::Syntax(){};
 
 void Syntax::getSyntax(vector<string> &datos) {
@@ -292,31 +293,31 @@ int Syntax::forAnalizer(const vector<string>& datos) {
     size_t i = 0;
 
     // 1.- Check for "for"
-    if (!matchKeyword(datos, i, {"f", "o", "r"})) {
+    if (!Check::matchKeyword(datos, i, {"f", "o", "r"})) {
         cout << "ERROR: Hay un error en el bucle for (no hay for)" << endl;
         return -1;
     }    
     // 2.- Check for identifier
-    if (!isIdentifier(datos, i)) {
+    if (!Check::isIdentifier(datos, i)) {
         cout << "ERROR: Hay un error en el bucle for (no hay identificador)" << endl;
         return -1;
     }
         
     // 3.- Check for assignment operator ":="
-    if (!matchOperator(datos, i, {":", "="})) {
+    if (!Check::matchOperator(datos, i, {":", "="})) {
         cout << "ERROR: Hay un error en el bucle for (no hay :=)" << endl;
         return -1;
     }
     
     // 4.- Check for initial value (number)
-    if (!isNumber(datos, i)) {
+    if (!Check::isNumber(datos, i)) {
         cout << "ERROR: Hay un error en el bucle for (valor inicial no es un numero)" << endl;
         return -1;
     }
     
     // 5.- Check for "to" or "downto"
-    bool isTo = matchKeyword(datos, i, {"t", "o"});
-    bool isDownTo = matchKeyword(datos, i, {"d", "o", "w", "n", "t", "o"});
+    bool isTo = Check::matchKeyword(datos, i, {"t", "o"});
+    bool isDownTo = Check::matchKeyword(datos, i, {"d", "o", "w", "n", "t", "o"});
 
     if (!isTo && !isDownTo) {
         cout << "ERROR: Hay un error en el bucle for (no hay to/downto)" << endl;
@@ -324,13 +325,13 @@ int Syntax::forAnalizer(const vector<string>& datos) {
     }
     
     // 6.- Check for final value (number)
-    if (!isNumber(datos, i)) {
+    if (!Check::isNumber(datos, i)) {
         cout << "ERROR: Hay un error en el bucle for (valor final no es un numero)" << endl;
         return -1;
     }
     
     // 7.- Check for "do"
-    if (!matchKeyword(datos, i, {"d", "o"})) {
+    if (!Check::matchKeyword(datos, i, {"d", "o"})) {
         cout << "ERROR: Hay un error en el bucle for (no hay do)" << endl;
         return -1;
     }
@@ -344,19 +345,19 @@ int Syntax::forAnalizer(const vector<string>& datos) {
 int Syntax::ifAnalizer(const vector<string>& datos) {
     size_t i = 0;
 
-    if (!matchKeyword(datos, i, {"i", "f"})) {
+    if (!Check::matchKeyword(datos, i, {"i", "f"})) {
         cout << "ERROR: Hay un error en el if (no hay if)" << endl;
         return -1;
     }
 
     // condition (identifier)
-    if (!isIdentifier(datos, i)) {
+    if (!Check::isIdentifier(datos, i)) {
         cout << "ERROR: Hay un error en el if (no hay identificador)" << endl;
         return -1;
     }
 
     // 3.- Check for "then"
-    if (!matchKeyword(datos, i, {"t", "h", "e", "n"})) {
+    if (!Check::matchKeyword(datos, i, {"t", "h", "e", "n"})) {
         cout << "ERROR: Hay un error en el if (no hay then)" << endl;
         return -1;
     }
@@ -366,61 +367,7 @@ int Syntax::ifAnalizer(const vector<string>& datos) {
     return i;
 }
 
-bool Syntax::matchKeyword(const vector<string>& datos, size_t& i, const vector<string>& keyword) {
-    if (i + keyword.size() <= datos.size()) {
-        for (size_t j = 0; j < keyword.size(); ++j) {
-            if (datos[i + j] != keyword[j]) {
-                return false;
-            }
-        }
-        i += keyword.size();
-        return true;
-    }
-    return false;
-}
 
-bool Syntax::isIdentifier(const vector<string>& datos, size_t& i) {
-    if (i >= datos.size() || datos[i].empty() || !isalpha(datos[i][0])) {
-        return false;
-    }
-    i++;
-    return true;
-}
-
-bool Syntax::isNumber(const vector<string>& datos, size_t& i) {
-    if (i >= datos.size() || datos[i].empty()) {
-        return false;
-    }
-    for (char c : datos[i]) {
-        if (!isdigit(c)) {
-            return false;
-        }
-    }
-    i++;
-    return true;
-}
-
-bool Syntax::isNumber(string word){
-    for (char c : word) {
-        if (!isdigit(c)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool Syntax::matchOperator(const vector<string>& datos, size_t& i, const vector<string>& op) {
-    if (i + op.size() <= datos.size()) {
-        for (size_t j = 0; j < op.size(); ++j) {
-            if (datos[i + j] != op[j]) {
-                return false;
-            }
-        }
-        i += op.size();
-        return true;
-    }
-    return false;
-}
 
 void Syntax::recursiveTree(Tree<string>&padre, vector<string> &datos, int initialNumber, int finalNumber){
     recursiveTree(padre.getRaiz(), padre, symbols, datos, initialNumber, finalNumber);

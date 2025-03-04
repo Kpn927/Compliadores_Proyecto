@@ -14,17 +14,19 @@ class Syntax{
 
     void getSyntax(vector<string> &datos);
 
-    void getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int initialNumber, int finalNumber);
+    int getFinalNumber(int initialNumber, vector<string> &datos);
+
+    void getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber);
 
     void recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<string> &datos, int initialNumber, int finalNumber);
 
     void recursiveTree(Tree<string>&padre, vector<string> &datos, int initialNumber, int finalNumber);
 
-    void getSyntaxVar(vector<string> &datos, vector<string> &symbols, int initial, int final);
+    void getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &initial);
 
     bool isNumber(string word);
 
-    void getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int initial, int final);
+    void getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int initial);
     
     void CommentAnalizer(const vector<string>& datos);
 

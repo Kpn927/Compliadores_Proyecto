@@ -10,62 +10,64 @@ void Syntax::getSyntax(vector<string> &datos) {
         return;
     }
     
-    int finalNumber = 3, initialNumber;
-    bool final = true, flag_begin = true;
+    int initialNumber = 3;
 
-    while (final) {
-        /* MANEJO DE NUMEROS INICIALES Y FINALES */   
-        initialNumber = finalNumber;
-        
-        if (datos[initialNumber] == "end" && datos[initialNumber + 1] == ".") {
-            cout << endl << "Codigo terminado";
-            return;
+    if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
+        initialNumber++;
+        while(datos[initialNumber] != identifiers[4]){
+            getSyntaxVar(datos, symbols, initialNumber);
         }
-        
-        if (datos[initialNumber] == identifiers[4]) {
-            // getsyntaxbegin
-            if (flag_begin) {
-                flag_begin = false;
+    }
+    
+    initialNumber=24;
+    if (datos[initialNumber] == identifiers[4]) {
+        initialNumber++;
+        getSyntaxBegin(datos, symbols, initialNumber);
+    }
+};
+
+int Syntax::getFinalNumber(int finalNumber, vector<string> &datos){
+    while (finalNumber < datos.size() && datos[finalNumber + 1] != ";") {
+        finalNumber++;
+    }
+    return finalNumber;
+}
+
+void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber){
+    bool final = true;
+    int finalNumber;
+    while (final){
+        finalNumber = getFinalNumber(initialNumber, datos);
+        if (datos[initialNumber] == "end") {
+            if (datos[initialNumber + 1] == "."){
+                cout << endl << "Codigo terminado";
+                return;
+            }else if (datos[initialNumber + 1] != ";"){
+                cout<<"Begin-End mal declarado"<<endl;
+                return;
+            } else{
+                cout<<"Begin-End terminado"<<endl;
+                return;
             }
+        } else if (datos[initialNumber] == "begin") {
+            initialNumber++;
+            getSyntaxBegin(datos, symbols, initialNumber);
         }
-
-        while (finalNumber < datos.size() && datos[finalNumber + 1] != ";") {
-            finalNumber++;
-        }
-        
-        if (flag_begin)
-        {
-            if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
-                getSyntaxVar(datos, symbols, initialNumber, finalNumber);
-            }
-        }
-
         int i = 0;
-
         while (i < variables.size()) {
             if (datos[initialNumber] == variables[i]) {
-                getSyntaxAsignation(datos, symbols, initialNumber, finalNumber);
+                getSyntaxAsignation(datos, symbols, initialNumber);
                 break;
             }
             i++;
         }
-
-        /* SIGUIENTE LINEA. */
         initialNumber = finalNumber + 2;
-        finalNumber = initialNumber;
-    }
-};
-
-void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int initialNumber, int finalNumber){
-    bool final = true;
-    while (final){
-        
     }
 
 }
 
-void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int initial, int final) {
-        
+void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &initial) {
+    int final = getFinalNumber(initial, datos);
     Tree<string> arbolvar;
 
     if (datos[initial] == identifiers[0])
@@ -95,7 +97,6 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int in
         variables.push_back(a->getValue());
     }
     
-
     try
     {
         bool flag = true;
@@ -118,8 +119,6 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int in
         std::cerr << e.what() << '\n';
     }
     
-
-
     try
     {
         bool flag = true;
@@ -188,16 +187,20 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int in
     {
         std::cerr << e.what() << '\n';
     }
+    
+        /* SIGUIENTE LINEA. */
+        initial = final + 2;
 }
 
-void Syntax::getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int initial, int final) {
+void Syntax::getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int initial) {
+    int final = getFinalNumber(initial, datos);
     Tree<string> arbolvar;
     
     arbolvar.insertarOrdenado("",0);
     
     recursiveTree(arbolvar, datos, initial, final);
     
-    // arbolvar.orden(arbolvar.getRaiz(), true);
+    arbolvar.orden(arbolvar.getRaiz(), true);
 
     Node<string> *a = arbolvar.getRaiz()->getRight();
     Node<string> *b = arbolvar.getRaiz()->getLeft();

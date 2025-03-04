@@ -1,5 +1,5 @@
 #include "Analizadores/lexico.h"
-#include "Analizadores/sintactico.h"
+#include "Analizadores/sintactico.cpp"
 #include <vector>
 
 int main() {

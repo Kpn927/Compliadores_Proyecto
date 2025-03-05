@@ -12,6 +12,6 @@ for i := 0 to 150 do
         writeln(x);
     end;
 // Hola, esto no deberia aparecer
-/* Hola, esto tampoco deberia aparecer */
-/* Esto si deberia aparecer
+(* Hola, esto tampoco deberia aparecer *)
+{ Hola, esto tampoco deberia aparecer }
 end.

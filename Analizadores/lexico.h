@@ -31,8 +31,9 @@ vector<string> symbols = {":=",":","(", ")", ";",  ",", ".", "{", "}", "+", "-",
 
 void show_vector(const vector<string>& v);
 void PrintingTokens(const vector<string>& v);
-vector<string> tokenize(const string& input);
+vector<string> tokenize(string& input);
 void PushToVariable(vector<string>& variables, const string& v);
+void deleteComments(string searchWord, string endWord, string &datos);
 
 void show_vector(const vector<string>& v) {
     for (const auto& x : v)
@@ -89,6 +90,21 @@ bool isNumber(const string& word) {
     return !word.empty();
 }
 
+void deleteComments(string searchWord, string endWord, string &datos){
+    size_t startPos = datos.find(searchWord);
+    if (startPos != std::string::npos) {
+        
+        size_t finalPos = datos.find(endWord, startPos);
+        if (finalPos != std::string::npos) {
+            size_t lengthToRemove = finalPos - startPos;
+            datos.erase(startPos, lengthToRemove+ endWord.size());
+            deleteComments(searchWord, endWord, datos);
+        } else {
+            cout << "'*/' not found after '/*'" << std::endl;
+        }
+    }
+}
+
 Tokens getTokenType(const string& word) {
     if (isReserved(word)) return Tokens::RESERVED;
     if (isOperator(word)) return Tokens::OPERATOR;
@@ -132,7 +148,10 @@ void PrintingTokens(const vector<string>& v) {
     }
 }
 
-vector<string> tokenize(const string& input) {
+vector<string> tokenize(string& input) {
+    deleteComments("//","\n",input);
+    deleteComments("(*","*)",input);
+    deleteComments("{","}",input);
     vector<string> tokens;
     string token;
     for (size_t i = 0; i < input.size(); i++) {

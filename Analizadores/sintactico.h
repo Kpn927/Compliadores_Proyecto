@@ -40,9 +40,8 @@ class Syntax{
     // Analizador de writeln
     void getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int initial);
 
-    void recursiveTreeWriteln(Node<string>* actual, Tree<string>& padre, vector<string> &datos, int initialNumber, int finalNumber);
-
-    void recursiveTreeWriteln(Tree<string>& padre, vector<string> &datos, int initialNumber, int finalNumber);
+    // Analizador del readln
+    void getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int initial);
 
     public:
     Syntax();

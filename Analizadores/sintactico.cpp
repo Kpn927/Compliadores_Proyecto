@@ -78,6 +78,21 @@ void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int 
                 }
                 i++;
             }
+            for (int j = initialNumber; j <= finalNumber; j++) {
+                if (datos[j] == reserved[5]) {	    
+                    int temp_writeln = j;
+                    getSyntaxwriteln(datos, symbols, temp_writeln);
+                    break;
+                }
+            }
+
+            for (int j = initialNumber; j <= finalNumber; j++) {
+                if (datos[j] == reserved[6]) {	    
+                    int temp_readln = j;
+                    getSyntaxreadln(datos, symbols, temp_readln);
+                    break;
+                }
+            }
             initialNumber = finalNumber + 2; 
         }
     }
@@ -450,12 +465,7 @@ void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<stri
     return;
 }
 
-string comillasagrupadoras(vector<string> datos, int &initialNumber, int finalNumber) {
-
-    if (initialNumber < 0 || initialNumber > finalNumber || finalNumber >= datos.size()) {
-        cout << "ERROR: Índices fuera de rango." << endl;
-        exit(1);
-    }
+string getString(vector<string> datos, int &initialNumber, int finalNumber) {
 
     string value = "";
 
@@ -482,84 +492,156 @@ string comillasagrupadoras(vector<string> datos, int &initialNumber, int finalNu
     return value;
 }
 
-
-void Syntax::recursiveTreeWriteln(Node<string>* actual, Tree<string>& padre, vector<string>& datos, int initialNumber, int finalNumber) {
-    if (initialNumber > finalNumber || actual == nullptr) {
-        return; // Condición base para detener la recursión
-    }
-
-    string value = "", temp_value = "";
-    int contador = 0;
-
-    // Primer ciclo para contar elementos
-    for (int i = initialNumber; i < finalNumber; i++) {
-
-        if (datos[i] == "\"") {
-            temp_value = comillasagrupadoras(datos, i, finalNumber);
-            contador++;
-        }
-        contador++;
-    }
-    contador--;
-
-    cout << "CONTADOR: " << contador << endl;
-
-    if (contador > 1) {
-        padre.insertarOrdenado("", 1, actual);
-        for (int i = initialNumber; i <= finalNumber; i++) {
-            
-            if (i > finalNumber) break; // Seguridad para evitar bucles infinitos
-
-            if (datos[i] == "+") {
-                padre.insertarOrdenado(datos[i], 2, actual);
-            } else if (datos[i] == "\"") {
-                value = comillasagrupadoras(datos, i, finalNumber);
-                padre.insertarOrdenado(value, 0, actual);
-            }
-        }
-    } else {
-        padre.insertarOrdenado(temp_value, 1, actual);
-    }
-}
-
-void Syntax::recursiveTreeWriteln(Tree<string>& padre, vector<string> &datos, int initialNumber, int finalNumber) {
-    recursiveTreeWriteln(padre.getRaiz(), padre, datos, initialNumber, finalNumber);
-}
-
 void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int initial) {
     unsigned int final = getFinalNumber(initial, datos);
     try
     {
         initial++;
+        vector<string> something;
 
-        Tree<string> arbolwriteln;
-
-        arbolwriteln.insertarOrdenado("" , 0);
-
-        if (datos[initial] == "(") {
-            arbolwriteln.insertarOrdenado(datos[initial], 0);
+        if (datos[initial] == symbols[2]) {
+            something.push_back(datos[initial]);
             initial++;
         } else {
             cout << "ERROR: Falta un parentesis izquierdo" << endl;
             exit(1);
         }
 
-        if (datos[final] == ")") {
-            arbolwriteln.insertarOrdenado(datos[final], 2);
+        while (initial != final)
+        {
+            bool flag = true;
+            if (flag)
+            {
+                if (datos[initial] == "\"") {
+                    string value = getString(datos, initial, final);
+                    something.push_back(value);
+                    flag = false;
+    
+                    if (datos[initial+1] == "\"")
+                    {
+                        cout << "ERROR: NO PUEDEN EXISTIR 2 STRINGS PEGADOS.";
+                        exit(1);
+                    }
+                    // si  
+                }
+            }
+            if (flag)
+            {
+                if (datos[initial] == symbols[9])
+                {
+                    if ((datos[initial-1] == symbols[2]) || (datos[initial+1] == symbols[3]))
+                    {
+                        cout << "ERROR: EL MAS DEBE TENER VARIABLES O STRINGS ENTRE ELLA";
+                        exit(1);
+                    } else if ((datos[initial+1] == symbols[9]) || (datos[initial-1] == symbols[9]))
+                    {
+                        cout << "ERROR: NO PUEDE HABER MAS DE 2 + JUNTOS.";
+                        exit(1);
+                    } else
+                    {
+                        something.push_back(datos[initial]);
+                        flag = false;
+                    }
+                }
+            }
+            if (flag)
+            {
+                for (int i = 0; i < variables.size(); i++)
+                {
+
+                    if (datos[initial] == variables[i])
+                    {
+                        something.push_back(datos[initial]);
+                        flag = true;
+                        break;
+                    } else
+                    {
+                        flag = false;
+                    }
+                    
+                }
+                if (!flag)
+                {
+                    cout << "ERROR: LO INGRESADO NO ES VARIABLE O NO HAY NADA." << endl;
+                    exit(1);
+                }
+            }
+            initial++;
+        }
+        
+
+        if ((initial == final) && (datos[initial] == symbols[3])) {
+            something.push_back(datos[initial]);
         } else {
             cout << "ERROR: Falta un parentesis derecho" << endl;
             exit(1);
         }
 
-        recursiveTreeWriteln(arbolwriteln, datos, initial, final);
-
-        Node<string> *a = arbolwriteln.getRaiz()->getCenter();
-
-        arbolwriteln.orden(arbolwriteln.getRaiz(), true);
-
+        /*for (int i = 0; i < something.size(); i++)
+        {
+            cout << something[i] << " ";
+        }*/
+        
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
     }
+}
+
+void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int initial) { 
+    int final = getFinalNumber(initial, datos);
+    initial++;
+    vector<string> comforting;
+
+    if (datos[initial] == symbols[2]) {
+
+        comforting.push_back(datos[initial]);
+        initial++;
+
+    } else {
+
+        cout << "ERROR: Falta un parentesis izquierdo" << endl;
+        exit(1);
+
+    }
+
+    bool flag = true;
+    for (int i = 0; i < variables.size(); i++)
+    {
+
+        if (datos[initial] == variables[i])
+        {
+            comforting.push_back(datos[initial]);
+            flag = true;
+            initial++;
+            break;
+        } else {
+            flag = false;
+        }
+    }
+
+    if (!flag)
+    {
+        cout << "ERROR: LO INGRESADO NO ES VARIABLE O NO HAY NADA. " << endl;
+        exit(1);
+    }
+    cout << datos[initial] << " and " << flag;
+    if ((initial == final) && (datos[initial] == symbols[3])) {
+        comforting.push_back(datos[initial]);
+    } else if ((datos[initial] != symbols[3]) && (flag))
+    {
+        
+        cout << "ERROR: SOLO DEBE HABER UNA VARIABLE. ";
+        exit(1);
+
+    } else {
+        cout << "ERROR: Falta un parentesis derecho" << endl;
+        exit(1);
+    }
+
+    /*for (int i = 0; i < comforting.size(); i++)
+    {
+        cout << comforting[i] << " ";
+    }*/
 }

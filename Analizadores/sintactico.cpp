@@ -1,13 +1,13 @@
 #include "sintactico.h"
 #include "verificaciones.h"
-Syntax::Syntax(){};
+Syntax::Syntax() {}
 
 void Syntax::getSyntax(vector<string> &datos) {
 
     std::ios::sync_with_stdio(false);
 
     if (datos.empty() || datos[0] != identifiers[6]) {
-        cout << "ERROR: Falta o esta escrito mal la palabra program'";
+        cout << "ERROR: Falta o esta escrito mal la palabra 'program'";
         return;
     }
     
@@ -20,7 +20,7 @@ void Syntax::getSyntax(vector<string> &datos) {
         }
     }
     
-    initialNumber=24;
+    //initialNumber=24;
     if (datos[initialNumber] == identifiers[4]) {
         initialNumber++;
         getSyntaxBegin(datos, symbols, initialNumber);
@@ -34,37 +34,54 @@ int Syntax::getFinalNumber(int finalNumber, vector<string> &datos){
     return finalNumber;
 }
 
-void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber){
+void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber) {
     bool final = true;
-    int finalNumber;
-    while (final){
-        finalNumber = getFinalNumber(initialNumber, datos);
-        if (datos[initialNumber] == "end") {
-            if (datos[initialNumber + 1] == "."){
-                cout << endl << "Codigo terminado";
-                return;
-            }else if (datos[initialNumber + 1] != ";"){
-                cout<<"Begin-End mal declarado"<<endl;
-                return;
-            } else{
-                cout<<"Begin-End terminado"<<endl;
-                return;
+    while (final) {
+        if (datos[initialNumber] == "end") { 
+            if (initialNumber + 1 < datos.size()) {
+                if (datos[initialNumber + 1] == ".") {
+                    cout << endl << "Codigo terminado";
+                    return;
+                } else if (datos[initialNumber + 1] != ";") {
+                    cout << "Begin-End mal declarado" << endl;
+                    return;
+                } else {
+                    cout << "Begin-End terminado" << endl;
+                    return;
+                }
             }
-        } else if (datos[initialNumber] == "begin") {
+        } 
+        else if (datos[initialNumber] == "begin") {
             initialNumber++;
             getSyntaxBegin(datos, symbols, initialNumber);
         }
-        int i = 0;
-        while (i < variables.size()) {
-            if (datos[initialNumber] == variables[i]) {
-                getSyntaxAsignation(datos, symbols, initialNumber);
-                break;
-            }
-            i++;
+        else if (datos[initialNumber] == "if") {
+            //cout << "Analizando el if" << endl;
+            int result = ifAnalizer(datos, initialNumber);
+            if (result == -1) return; 
+            initialNumber = result;
         }
-        initialNumber = finalNumber + 2;
+        else if (datos[initialNumber] == "for") {
+            //cout << "Analizando el for" << endl;
+            int result = forAnalizer(datos, initialNumber);
+            if (result == -1) return; 
+            initialNumber = result;
+        }
+        
+        else {
+            int finalNumber = getFinalNumber(initialNumber, datos);
+            
+            int i = 0;
+            while (i < variables.size()) {
+                if (datos[initialNumber] == variables[i]) {
+                    getSyntaxAsignation(datos, symbols, initialNumber);
+                    break;
+                }
+                i++;
+            }
+            initialNumber = finalNumber + 2; 
+        }
     }
-
 }
 
 void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &initial) {
@@ -289,81 +306,114 @@ void Syntax::CommentAnalizer(const vector<string>& datos) {
     }
 }
 
-int Syntax::forAnalizer(const vector<string>& datos) {
-    size_t i = 0;
+int Syntax::forAnalizer(vector<string>& datos, int &i) {
+    //size_t i = 0;
 
     // 1.- Check for "for"
-    if (!Check::matchKeyword(datos, i, {"f", "o", "r"})) {
+    if (i >= datos.size() || datos[i] != "for") {
         cout << "ERROR: Hay un error en el bucle for (no hay for)" << endl;
         return -1;
     }    
+    i++;
+
     // 2.- Check for identifier
-    if (!Check::isIdentifier(datos, i)) {
+    if (!Check::isIdentifier(datos[i])) {
         cout << "ERROR: Hay un error en el bucle for (no hay identificador)" << endl;
         return -1;
     }
+    i++;
         
     // 3.- Check for assignment operator ":="
-    if (!Check::matchOperator(datos, i, {":", "="})) {
+    if (i+1 >= datos.size() || datos[i] != ":=") {
         cout << "ERROR: Hay un error en el bucle for (no hay :=)" << endl;
         return -1;
     }
+    i++;
     
     // 4.- Check for initial value (number)
-    if (!Check::isNumber(datos, i)) {
+    if (!Check::isNumber(datos[i])) {
         cout << "ERROR: Hay un error en el bucle for (valor inicial no es un numero)" << endl;
+        cout << datos[i];
         return -1;
     }
+    i++;
     
     // 5.- Check for "to" or "downto"
-    bool isTo = Check::matchKeyword(datos, i, {"t", "o"});
-    bool isDownTo = Check::matchKeyword(datos, i, {"d", "o", "w", "n", "t", "o"});
-
-    if (!isTo && !isDownTo) {
-        cout << "ERROR: Hay un error en el bucle for (no hay to/downto)" << endl;
+    if (i >= datos.size() || (datos[i] != "to" && datos[i] != "downto")) {
+        cout << "Hay un error en le bulcer for (no hay downto/to)" << endl;
         return -1;
     }
-    
+    i++;
+
     // 6.- Check for final value (number)
-    if (!Check::isNumber(datos, i)) {
+    if (!Check::isNumber(datos[i])) {
         cout << "ERROR: Hay un error en el bucle for (valor final no es un numero)" << endl;
         return -1;
     }
+    i++;
     
     // 7.- Check for "do"
-    if (!Check::matchKeyword(datos, i, {"d", "o"})) {
+    if (i >= datos.size() || datos[i] != "do") {
         cout << "ERROR: Hay un error en el bucle for (no hay do)" << endl;
         return -1;
     }
+    i++;
+    
     
     // Return the index where the analysis ends
-    cout << "Analysis of 'for' statement ended at index: " << i << endl;
-    cout << "Last token analyzed: " << datos[i - 1] << endl;
+    // cout << "Analysis of 'for' statement ended at index: " << i << endl;
+    // cout << "Last token analyzed: " << datos[i - 1] << endl;
     return i;
 }
 
-int Syntax::ifAnalizer(const vector<string>& datos) {
-    size_t i = 0;
+int Syntax::ifAnalizer(vector<string>& datos, int &i) {
+    //size_t i = 0;
 
-    if (!Check::matchKeyword(datos, i, {"i", "f"})) {
+    if (i >= datos.size() || datos[i] != "if") {
         cout << "ERROR: Hay un error en el if (no hay if)" << endl;
         return -1;
     }
+    i++;
+    if (datos[i] == "(") {
+        i++;
+    }
 
-    // condition (identifier)
-    if (!Check::isIdentifier(datos, i)) {
-        cout << "ERROR: Hay un error en el if (no hay identificador)" << endl;
-        return -1;
+    while (i < datos.size() && datos[i] != ")" && datos[i] != "then") {
+        if (!Check::isIdentifier(datos[i]) &&
+            !isOperator(datos[i]) &&
+            !Check::isNumber(datos[i])) {
+                cout << "la condicion dentro del if esta mal" << endl;
+                return -1;
+            }
+            i++;
+    }
+    if (i >= datos.size() || datos[i] == ")") {
+        i++;
     }
 
     // 3.- Check for "then"
-    if (!Check::matchKeyword(datos, i, {"t", "h", "e", "n"})) {
+    if (i >= datos.size() || datos[i] != "then") {
         cout << "ERROR: Hay un error en el if (no hay then)" << endl;
         return -1;
     }
+    i++;
+
+    if (i < datos.size() && datos[i] != ";") {
+        if (datos[i] == "if") {
+            int result = ifAnalizer(datos, i);
+            if (result == -1) return -1;
+            i = result;
+        } else if (datos[i] == "begin"){
+            i++;
+            getSyntaxBegin(datos, symbols, i);
+        } else {
+            int final = getFinalNumber(i, datos);
+            i = final + 1;
+        } 
+    }
     
-    cout << "Analysis of 'if' statement ended at index: " << i << endl;
-    cout << "Last token analyzed: " << datos[i - 1] << endl;
+     //cout << "Analysis of 'if' statement ended at index: " << i << endl;
+     //cout << "Last token analyzed: " << datos[i - 1] << endl;
     return i;
 }
 

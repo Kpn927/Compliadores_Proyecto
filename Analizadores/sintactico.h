@@ -32,10 +32,10 @@ class Syntax{
     void CommentAnalizer(const vector<string>& datos);
 
     // Analizador de for
-    int forAnalizer(const vector<string>& datos);
+    int forAnalizer(vector<string>& datos, int &i);
 
     // Analizador de if
-    int ifAnalizer(const vector<string>& datos);
+    int ifAnalizer(vector<string>& datos, int &i);
 
 
     public:

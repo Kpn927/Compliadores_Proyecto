@@ -413,19 +413,27 @@ int Syntax::ifAnalizer(vector<string>& datos, int &i) {
     i++;
 
     if (i < datos.size() && datos[i] != ";") {
-        if (datos[i] == "if") {
+        if (datos[i] == "begin") {
+            i++;
+            getSyntaxBegin(datos, symbols, i);
+            
+        } else if (datos[i] == "if"){
             int result = ifAnalizer(datos, i);
             if (result == -1) return -1;
             i = result;
-        } else if (datos[i] == "begin"){
-            i++;
-            getSyntaxBegin(datos, symbols, i);
         } else {
+            for(const string& var : variables) {
+                if (datos[i] == var) {
+                    getSyntaxAsignation(datos, symbols, i);
+                    break;
+                }
+            }
             int final = getFinalNumber(i, datos);
             i = final + 1;
         } 
+        
     }
-    
+
      //cout << "Analysis of 'if' statement ended at index: " << i << endl;
      //cout << "Last token analyzed: " << datos[i - 1] << endl;
     return i;

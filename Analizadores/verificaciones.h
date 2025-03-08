@@ -15,10 +15,25 @@ class Check{
 
     static bool matchOperator(const vector<string>& datos, size_t& i, const vector<string>& op);
 
+    static bool verifyAsignation(Node<string>* actual);
 };
 
 bool Check::isIdentifier(const string& datos) {
     return (!datos.empty() && isalpha(datos[0]));
+}
+
+bool Check::verifyAsignation(Node<string>* actual){
+    bool right = false, left = false;
+    if((actual->getLeft()->getValue() == "")) left = Check::verifyAsignation(actual->getLeft());
+    if((actual->getRight()->getValue() == "")) right = Check::verifyAsignation(actual->getRight());
+    if(Check::isNumber(actual->getLeft()->getValue())) left = true;
+    if(Check::isNumber(actual->getRight()->getValue())) right = true;
+    for (int i = 0; i < variables.size(); i++){
+        if (left == false && variables[i].name == actual->getLeft()->getValue()) left = true;
+        if (right == false && variables[i].name == actual->getRight()->getValue()) right = true;     
+    }
+    if (left && right) return true;
+    else return false;
 }
 
 bool Check::isNumber(const vector<string>& datos, size_t& i) {

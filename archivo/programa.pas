@@ -3,12 +3,15 @@ var
     x,y,z,y1:integer;
     ELPEPEMAGICO:double;
 begin
-    x := 0;
+    readln(x);
+
+     x := 0;
     if (x > 3) then
     begin
         if (y < 5) then
             z := 10;
     end;
+    writeln("Hola" +);
 
 for x := 0 to 150 do
     begin

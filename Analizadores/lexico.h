@@ -20,13 +20,18 @@ enum class Tokens {
     NUMBER
 };
 
+struct Variables{
+    string name;
+    string value;
+};
+
 vector<string> reserved = {"if", "then", "to", "do", "downto", "writeln", "readln"};
 vector<string> operators = {"+", "-", "*", "/", ":=", "=", ">", "<", ">=", "<=", "==", "!=", "++",":"};
 vector<string> dataType = {"integer", "real", "character", "array", "boolean", "double"};
 vector<string> identifiers = {"var", "const", "procedure", "function", "begin", "end", "program"};
-vector<string> variables = {};
+vector<Variables> variables = {};
 vector<string> delimiters = {"(", ")", ";",  ",", ".", "{", "}"};
-vector<string> symbols = {":=",":","(", ")", ";",  ",", ".", "{", "}", "+", "-", "*", "/", "=", ">", "<", ">=", "<=", "==", "!=", "++"};
+vector<string> symbols = {":=",":", "+", "-", "*", "/","(", ")", ";",  ",", ".", "{", "}", "=", ">", "<", ">=", "<=", "==", "!=", "++"};
 
 
 void show_vector(const vector<string>& v);
@@ -71,7 +76,7 @@ bool isIdentifer(const string& word) {
 
 bool isVariable(const string& word) {
     for (const auto& type : variables) {
-        if (word == type) return true;
+        if (word == type.name) return true;
     }
     return false;
 }

@@ -245,27 +245,27 @@ string Syntax::phraseAnalizer(Node<string> *nodo){
         }
     }
     int i = 0;
-    int *left, *right , result;
+    float *left, *right , result;
     if(Check::isNumber(nodo->getLeft()->getValue())){
-         left = new int;
-        *left =std::stoi(nodo->getLeft()->getValue());
+         left = new float;
+        *left =std::stof(nodo->getLeft()->getValue());
     } 
     if(Check::isNumber(nodo->getRight()->getValue())){
-        right = new int;
-        *right =std::stoi(nodo->getRight()->getValue());
+        right = new float;
+        *right =std::stof(nodo->getRight()->getValue());
    }  
     while(i<variables.size()){
 
         if(variables[i].name == nodo->getLeft()->getValue() && !variables[i].value.empty()){
             if (Check::isNumber(variables[i].value)){
-                left = new int;
-                *left =(int) std::stoi(variables[i].value);
+                left = new float;
+                *left =(float) std::stof(variables[i].value);
             }
         }
         if(variables[i].name == nodo->getRight()->getValue() && !variables[i].value.empty()){
             if (Check::isNumber(variables[i].value)){
-                right = new int;
-                *right =(int) std::stoi(variables[i].value);
+                right = new float;
+                *right =(float) std::stof(variables[i].value);
             }
         }
         i++;
@@ -323,13 +323,13 @@ void Syntax::getSyntaxAsignation(vector<string> &datos, vector<string> &symbols,
     }
         
     initial = final+2;
-    string hola = (string) phraseAnalizer(arbolvar.getRaiz()->getRight());
+    string value = (string) phraseAnalizer(arbolvar.getRaiz()->getRight());
     int i = 0;
     while(i<variables.size()){
-        if(arbolvar.getRaiz()->getLeft()->getValue() == variables[i].name) variables[i].value = hola;
+        if(arbolvar.getRaiz()->getLeft()->getValue() == variables[i].name) variables[i].value = value;
         i++;
     }
-    cout<<"[resultado: "<<hola<<"]"<<endl;
+    cout<<"[resultado: "<<value<<"]"<<endl;
     return;
 }
 
@@ -490,33 +490,37 @@ void Syntax::recursiveTree(Tree<string>&padre, vector<string> &datos, int initia
 
 void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<string> &datos, int initialNumber, int finalNumber){
     // detectar separador
-    int symbol;
+    int symbol, j, lastParentesis;
     if (actual==NULL) return;
-    if (datos[initialNumber] == "("){
-        padre.insertarOrdenado(datos[initialNumber],0,actual);
-        initialNumber++;
-        finalNumber=initialNumber;
-        while(datos[finalNumber]!=")"){
-            finalNumber++;
+    if (datos[initialNumber]=="("){
+        lastParentesis=initialNumber+2;
+        while(datos[lastParentesis]!=")"){
+            lastParentesis++;
         }
-        if(datos[finalNumber] == ")") padre.insertarOrdenado(datos[finalNumber],2,actual);
-        if(finalNumber-initialNumber== 1) cout<<"NADA ENTRE LOS PARENTESIS"<<endl;
-        else if(finalNumber-initialNumber== 2) padre.insertarOrdenado(datos[finalNumber],1,actual);
-        else if(finalNumber-initialNumber> 2) {
-            padre.insertarOrdenado("", 1, actual);
-            recursiveTree(actual->getCenter(), padre, symbols, datos, initialNumber, finalNumber-1);
+        if (lastParentesis ==finalNumber){
+            padre.insertarOrdenado(datos[initialNumber],0,actual);
+            padre.insertarOrdenado(datos[lastParentesis],2,actual);
+            if(finalNumber-initialNumber== 1) cout<<"NADA ENTRE LOS PARENTESIS"<<endl;
+            else if(finalNumber-initialNumber== 2) padre.insertarOrdenado(datos[finalNumber],1,actual);
+            else if(finalNumber-initialNumber> 2) {
+                padre.insertarOrdenado("", 1, actual);
+                recursiveTree(actual->getCenter(), padre, symbols, datos, initialNumber+1, finalNumber-1);
+            }
+            return;
         }
-    }else{
-        for(int i = 0; i< symbols.size(); i++){
-            for(int j = initialNumber; j<=finalNumber;j++){
-                if (symbols[i]==datos[j]){
-                    padre.insertarOrdenado(datos[j], 1, actual);
-                    symbol=j;
-                    j= finalNumber+1;
-                    i = symbols.size() +1;
-                }
+        else j = lastParentesis;
+    }
+    else j=initialNumber;
+    for(int i = 0; i< symbols.size(); i++){
+        for(int k = j; k<=finalNumber;k++){
+            if (symbols[i]==datos[k]){
+                padre.insertarOrdenado(datos[k], 1, actual);
+                symbol=k;
+                k= finalNumber+1;
+                i = symbols.size() +1;
             }
         }
+    }
         if (symbol==initialNumber+1) padre.insertarOrdenado(datos[symbol-1], 0, actual);
         else {
             padre.insertarOrdenado("", 0, actual);
@@ -528,7 +532,6 @@ void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<stri
             padre.insertarOrdenado("", 2, actual);
             recursiveTree(actual->getRight(), padre, symbols, datos, symbol+1, finalNumber);
         }
-    }
     return;
 }
 

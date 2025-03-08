@@ -23,11 +23,15 @@ bool Check::isIdentifier(const string& datos) {
 }
 
 bool Check::verifyAsignation(Node<string>* actual){
-    bool right = false, left = false;
+    bool right = false, left = false, center;
+    if((actual->getCenter()->getValue() == "")){
+        center = Check::verifyAsignation(actual->getCenter());
+        return center;
+    }
     if((actual->getLeft()->getValue() == "")) left = Check::verifyAsignation(actual->getLeft());
-    else if(Check::isNumber(actual->getRight()->getValue())) right = true;
-    if((actual->getRight()->getValue() == "")) right = Check::verifyAsignation(actual->getRight());
     else if(Check::isNumber(actual->getLeft()->getValue())) left = true;
+    if((actual->getRight()->getValue() == "")) right = Check::verifyAsignation(actual->getRight());
+    else if(Check::isNumber(actual->getRight()->getValue())) right = true;
     for (int i = 0; i < variables.size(); i++){
         if (left == false && variables[i].name == actual->getLeft()->getValue()) left = true;
         if (right == false && variables[i].name == actual->getRight()->getValue()) right = true;     
@@ -50,12 +54,27 @@ bool Check::isNumber(const vector<string>& datos, size_t& i) {
 }
 
 bool Check::isNumber(string word){
-    for (char c : word) {
-        if (!isdigit(c)) {
+    bool hasDecimal = false;
+    bool hasDigits = false;
+
+    for (size_t i = 0; i < word.length(); ++i) {
+        char c = word[i];
+
+        if (isdigit(c)) {
+            hasDigits = true;
+        }
+        else if (c == '.') {
+            if (hasDecimal) return false;
+            hasDecimal = true;
+        }
+        else if (c == '-' || c == '+') {
+            if (i != 0) return false;
+        }
+        else {
             return false;
         }
     }
-    return true;
+    return hasDigits;
 }
 
 bool Check::matchOperator(const vector<string>& datos, size_t& i, const vector<string>& op) {

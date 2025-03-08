@@ -3,7 +3,6 @@ var
     x,y,z,y1:integer;
     ELPEPEMAGICO:double;
 begin
-    readln(x);
 
      x := 0;
     if (x > 3) then
@@ -11,7 +10,6 @@ begin
         if (y < 5) then
             z := 10;
     end;
-    writeln("Hola" +);
 
 for x := 0 to 150 do
     begin
@@ -23,7 +21,7 @@ for x := 0 to 150 do
     x := x + 1;
     y1 := 10;
     z := x + 10;
-    y := x+y1+(z*3+2);
+    y := (x+y1)+(z*6/3);
 
 
 end.

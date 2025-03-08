@@ -25,15 +25,15 @@ bool Check::isIdentifier(const string& datos) {
 bool Check::verifyAsignation(Node<string>* actual){
     bool right = false, left = false;
     if((actual->getLeft()->getValue() == "")) left = Check::verifyAsignation(actual->getLeft());
+    else if(Check::isNumber(actual->getRight()->getValue())) right = true;
     if((actual->getRight()->getValue() == "")) right = Check::verifyAsignation(actual->getRight());
-    if(Check::isNumber(actual->getLeft()->getValue())) left = true;
-    if(Check::isNumber(actual->getRight()->getValue())) right = true;
+    else if(Check::isNumber(actual->getLeft()->getValue())) left = true;
     for (int i = 0; i < variables.size(); i++){
         if (left == false && variables[i].name == actual->getLeft()->getValue()) left = true;
         if (right == false && variables[i].name == actual->getRight()->getValue()) right = true;     
     }
-    if (left && right) return true;
-    else return false;
+    if (left==true && right==true) return true;
+    return false;
 }
 
 bool Check::isNumber(const vector<string>& datos, size_t& i) {

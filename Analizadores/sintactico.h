@@ -26,7 +26,7 @@ class Syntax{
     void getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &initial);
 
     //sintaxis de Asignaciones x:=1;
-    void getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int initial);
+    void getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int &initial);
 
     // Analizador de comentarios
     void CommentAnalizer(const vector<string>& datos);
@@ -43,6 +43,8 @@ class Syntax{
     void recursiveTreeWriteln(Node<string>* actual, Tree<string>& padre, vector<string> &datos, int initialNumber, int finalNumber);
 
     void recursiveTreeWriteln(Tree<string>& padre, vector<string> &datos, int initialNumber, int finalNumber);
+
+    string phraseAnalizer(Node<string> *nodo);
 
     public:
     Syntax();

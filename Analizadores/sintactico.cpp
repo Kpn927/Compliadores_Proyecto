@@ -464,8 +464,8 @@ int Syntax::ifAnalizer(vector<string>& datos, int &i) {
             if (result == -1) return -1;
             i = result;
         } else {
-            for(const string& var : variables) {
-                if (datos[i] == var) {
+            for(const Variables var : variables) {
+                if (datos[i] == var.name) {
                     getSyntaxAsignation(datos, symbols, i);
                     break;
                 }
@@ -616,7 +616,7 @@ void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, in
                 for (int i = 0; i < variables.size(); i++)
                 {
 
-                    if (datos[initial] == variables[i])
+                    if (datos[initial] == variables[i].name)
                     {
                         something.push_back(datos[initial]);
                         flag = true;
@@ -677,7 +677,7 @@ void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int
     for (int i = 0; i < variables.size(); i++)
     {
 
-        if (datos[initial] == variables[i])
+        if (datos[initial] == variables[i].name)
         {
             comforting.push_back(datos[initial]);
             flag = true;

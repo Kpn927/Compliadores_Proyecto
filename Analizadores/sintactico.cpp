@@ -6,11 +6,11 @@ void Syntax::getSyntax(vector<string> &datos) {
 
     std::ios::sync_with_stdio(false);
     try{
-        if (datos.empty() || datos[0] != identifiers[6]) {
-            cout << "ERROR: Falta o esta escrito mal la palabra 'program'";
-            return;
-        }
-        
+        if (datos.empty() || datos[0] != identifiers[6]) throw invalid_argument("Falta o esta escrito mal la palabra 'program'");
+        if (datos[2] != ";") throw invalid_argument("Falta ';' en declaración de program");
+        if (Check::isReserved(datos[1])) throw invalid_argument("declaración de Program tiene una palabra reservada");
+        reserved.push_back(datos[1]);
+
         int initialNumber = 3;
     
         if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
@@ -69,32 +69,11 @@ void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int 
             if (result == -1) return; 
             initialNumber = result;
         }else if (datos[initialNumber] == ";") initialNumber++;
+        else if (Check::isVariable(datos[initialNumber])) getSyntaxAsignation(datos, symbols, initialNumber);
+        else if (datos[initialNumber]=="writeln") getSyntaxwriteln(datos, symbols, initialNumber);
+        else if (datos[initialNumber]=="readln") getSyntaxreadln(datos, symbols, initialNumber);
         else {
-            int finalNumber = getFinalNumber(initialNumber, datos);
-            int i = 0;
-            while (i < variables.size()) {
-                if (datos[initialNumber] == variables[i].name) {
-                    getSyntaxAsignation(datos, symbols, initialNumber);
-                    i = variables.size();
-                }
-                i++;
-            }
-            for (int j = initialNumber; j <= finalNumber; j++) {
-                if (datos[j] == reserved[5]) {	    
-                    int temp_writeln = j;
-                    getSyntaxwriteln(datos, symbols, temp_writeln);
-                    break;
-                }
-            }
-
-            for (int j = initialNumber; j <= finalNumber; j++) {
-                if (datos[j] == reserved[6]) {	    
-                    int temp_readln = j;
-                    getSyntaxreadln(datos, symbols, temp_readln);
-                    break;
-                }
-            }
-            initialNumber = finalNumber + 2; 
+            throw invalid_argument("Simbolo no reconocido");
         }
     }
 }
@@ -292,9 +271,7 @@ void Syntax::getSyntaxAsignation(vector<string> &datos, vector<string> &symbols,
     Node<string> *a = arbolvar.getRaiz()->getRight();
     Node<string> *b = arbolvar.getRaiz()->getLeft();
 
-    for (int i = 0; i < variables.size(); i++){
-        if (b->getValue() == variables[i].name) throw invalid_argument("ERROR: NO PUSISTE UNA FOKIN VARIABLE");
-    }
+    if(!Check::isVariable(b->getValue())) throw invalid_argument("ERROR: NO PUSISTE UNA FOKIN VARIABLE");
     
     if (!Check::verifyAsignation(arbolvar.getRaiz())) throw invalid_argument("NO PUSISTE BIEN LA ASIGNACION DE VARIABLE");
 

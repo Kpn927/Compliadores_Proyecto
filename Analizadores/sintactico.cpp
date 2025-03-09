@@ -309,35 +309,6 @@ void Syntax::getSyntaxAsignation(vector<string> &datos, vector<string> &symbols,
     return;
 }
 
-// Faltaria la logica del // para ver como terminariamos la linea
-void Syntax::CommentAnalizer(const vector<string>& datos) {
-    size_t i = 0;
-    bool multiLine = false;
-
-    while (i < datos.size()) {
-        if (!multiLine && i + 1 < datos.size() && datos[i] == "/" && datos[i + 1] == "/") { // Single-line comment
-            i += 2; // Skip "//"
-            while (i < datos.size() && datos[i] != "\n") { // Go to the end of the line
-                i++;
-            }
-            if (i < datos.size() && datos[i] == "\n") { // Skip the newline
-                i++;
-            }
-        } else if (!multiLine && i + 1 < datos.size() && datos[i] == "(" && datos[i + 1] == "*") { // Start of multi-line comment
-            multiLine = true;
-            i += 2;
-        } else if (multiLine && i + 1 < datos.size() && datos[i] == "*" && datos[i + 1] == ")") { // End of multi-line comment
-            multiLine = false;
-            i += 2;
-        } else if (multiLine && i == datos.size() - 1) {
-            cout << "ERROR: Comentario Multilineal no cerrado" << endl;
-            break;
-        } else {
-            i++;
-        }
-    }
-}
-
 int Syntax::forAnalizer(vector<string>& datos, int &i) {
     //size_t i = 0;
 

@@ -28,9 +28,6 @@ class Syntax{
     //sintaxis de Asignaciones x:=1;
     void getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int &initial);
 
-    // Analizador de comentarios
-    void CommentAnalizer(const vector<string>& datos);
-
     // Analizador de for
     int forAnalizer(vector<string>& datos, int &i);
 

@@ -14,7 +14,7 @@ class Syntax{
     int getFinalNumber(int initialNumber, vector<string> &datos);
 
     // Método para sintaxis de Begin-End
-    void getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber);
+    void getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal);
 
     // Método para crear los árboles
     void recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<string> &datos, int initialNumber, int finalNumber);

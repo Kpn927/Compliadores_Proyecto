@@ -22,7 +22,7 @@ void Syntax::getSyntax(vector<string> &datos) {
 
     if (datos[initialNumber] == identifiers[4]) {
         initialNumber++;
-        getSyntaxBegin(datos, symbols, initialNumber);
+        getSyntaxBegin(datos, symbols, initialNumber, true);
     }
 };
 
@@ -33,7 +33,7 @@ int Syntax::getFinalNumber(int finalNumber, vector<string> &datos){
     return finalNumber;
 }
 
-void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber) {
+void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal) {
     bool final = true;
     while (final) {
         if (datos[initialNumber] == "end") { 
@@ -47,12 +47,13 @@ void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int 
                 } else {
                     cout << "Begin-End terminado" << endl;
                     initialNumber++;
+                    if (!isPrincipal) return;
                 }
             }
         } 
         else if (datos[initialNumber] == "begin") {
             initialNumber++;
-            getSyntaxBegin(datos, symbols, initialNumber);
+            getSyntaxBegin(datos, symbols, initialNumber, false);
         }
         else if (datos[initialNumber] == "if") {
             //cout << "Analizando el if" << endl;
@@ -457,7 +458,7 @@ int Syntax::ifAnalizer(vector<string>& datos, int &i) {
     if (i < datos.size() && datos[i] != ";") {
         if (datos[i] == "begin") {
             i++;
-            getSyntaxBegin(datos, symbols, i);
+            getSyntaxBegin(datos, symbols, i, false);
             
         } else if (datos[i] == "if"){
             int result = ifAnalizer(datos, i);
@@ -470,8 +471,8 @@ int Syntax::ifAnalizer(vector<string>& datos, int &i) {
                     break;
                 }
             }
-            int final = getFinalNumber(i, datos);
-            i = final + 1;
+            // int final = getFinalNumber(i, datos);
+            // i = final + 1;
         } 
         
     }

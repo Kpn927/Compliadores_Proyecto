@@ -35,10 +35,10 @@ class Syntax{
     int ifAnalizer(vector<string>& datos, int &i);
 
     // Analizador de writeln
-    void getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int initial);
+    void getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int &initial);
 
     // Analizador del readln
-    void getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int initial);
+    void getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int &initial);
 
     string phraseAnalizer(Node<string> *nodo);
 

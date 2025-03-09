@@ -26,6 +26,7 @@ void Syntax::getSyntax(vector<string> &datos) {
         }
     } catch (const invalid_argument& e){
         cerr<<"Error: "<< e.what()<<endl;
+        exit(1);
     }
 };
 
@@ -457,149 +458,122 @@ string getString(vector<string> datos, int &initialNumber, int finalNumber) {
     return value;
 }
 
-void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int initial) {
+void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int &initial) {
     unsigned int final = getFinalNumber(initial, datos);
-    try
-    {
+    try {
         initial++;
         vector<string> something;
 
-        if (datos[initial] == symbols[2]) {
+        if (datos[initial] == symbols[6]) {
             something.push_back(datos[initial]);
             initial++;
         } else {
-            throw invalid_argument("Falta un parentesis izquierdo");
-        }
-
-        while (initial != final)
-        {
-            bool flag = true;
-            if (flag)
-            {
-                if (datos[initial] == "\"") {
-                    string value = getString(datos, initial, final);
-                    something.push_back(value);
-                    flag = false;
-    
-                    if (datos[initial+1] == "\"")
-                    {
-                        throw invalid_argument("NO PUEDEN EXISTIR 2 STRINGS PEGADOS.");
-
-                    }
-                    // si  
-                }
-            }
-            if (flag)
-            {
-                if (datos[initial] == symbols[9])
-                {
-                    if ((datos[initial-1] == symbols[2]) || (datos[initial+1] == symbols[3]))
-                    {
-                        throw invalid_argument("EL MAS DEBE TENER VARIABLES O STRINGS ENTRE ELLA");
-
-                    } else if ((datos[initial+1] == symbols[9]) || (datos[initial-1] == symbols[9]))
-                    {
-                        throw invalid_argument("NO PUEDE HABER MAS DE 2 + JUNTOS.");
-
-                    } else
-                    {
-                        something.push_back(datos[initial]);
-                        flag = false;
-                    }
-                }
-            }
-            if (flag)
-            {
-                for (int i = 0; i < variables.size(); i++)
-                {
-
-                    if (datos[initial] == variables[i].name)
-                    {
-                        something.push_back(datos[initial]);
-                        flag = true;
-                        break;
-                    } else
-                    {
-                        flag = false;
-                    }
-                    
-                }
-                if (!flag)
-                {
-                    throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA.");
-                }
-            }
-            initial++;
+            throw invalid_argument("ERROR: FALTA UN PARENTESIS IZQUIERDO.");
         }
         
+        while (initial != final) {
+            if (datos[initial] == "\"") {
+                string value = getString(datos, initial, final);
+                something.push_back(value);
+                if (datos[initial + 1] == "\"") {
+                    throw invalid_argument("NO PUEDEN EXISTIR 2 STRINGS PEGADOS.");
+                }
+                continue;
+            }
 
-        if ((initial == final) && (datos[initial] == symbols[3])) {
+            if (datos[initial] == symbols[2]) {
+                if ((datos[initial - 1] == symbols[6]) || (datos[initial + 1] == symbols[7])) {
+                    throw invalid_argument("EL MAS DEBE TENER VARIABLES O STRINGS ENTRE ELLA");
+                } else if ((datos[initial + 1] == symbols[2]) || (datos[initial - 1] == symbols[2])) {
+                    throw invalid_argument("NO PUEDE HABER MAS DE 2 + JUNTOS.");
+                }
+                something.push_back(datos[initial]);
+                continue;
+            }
+
+            if ((datos[initial] == symbols[7])) {
+                if (datos[initial+1]!= symbols[8]) {
+                    throw invalid_argument("ERROR: FALTA UN ; .");
+                }   
+            }
+
+            bool isVariable = false;
+            for (const auto &variable : variables) {
+                if (datos[initial] == variable.name) {
+                    something.push_back(datos[initial]);
+                    isVariable = true;
+                    break;
+                }
+            }
+
+            if (!isVariable) {
+                throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA.");
+            }
+
+            initial++;
+        }
+    
+        if ((initial == final) && (datos[initial] == symbols[7])) {
             something.push_back(datos[initial]);
+            
         } else {
             throw invalid_argument("Falta un parentesis derecho");
         }
 
-        /*for (int i = 0; i < something.size(); i++)
-        {
-            cout << something[i] << " ";
+        initial++;
+
+        /*for (const auto &item : something) {
+            cout << item << " ";
         }*/
-        
-    }
-    catch(const std::exception& e)
-    {
+    } catch (const std::exception &e) {
         std::cerr << e.what() << '\n';
     }
 }
 
-void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int initial) { 
+void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int &initial) {
     int final = getFinalNumber(initial, datos);
     initial++;
     vector<string> comforting;
 
-    if (datos[initial] == symbols[2]) {
-
+    // Verificar paréntesis izquierdo
+    if (datos[initial] == symbols[6]) {
         comforting.push_back(datos[initial]);
         initial++;
-
     } else {
-
-        throw invalid_argument("Falta un parentesis izquierdo");
-
+        throw invalid_argument("FALTA UN PARENTESIS IZQUIERDO.");
     }
 
-    bool flag = true;
-    for (int i = 0; i < variables.size(); i++)
-    {
-
-        if (datos[initial] == variables[i].name)
-        {
+    // Verificar si el siguiente dato es una variable válida
+    bool isVariable = false;
+    for (const auto &variable : variables) {
+        if (datos[initial] == variable.name) {
             comforting.push_back(datos[initial]);
-            flag = true;
+            isVariable = true;
             initial++;
             break;
-        } else {
-            flag = false;
         }
     }
 
-    if (!flag)
-    {
-        throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA. ");
-    }
-    cout << datos[initial] << " and " << flag;
-    if ((initial == final) && (datos[initial] == symbols[3])) {
+    
+    cout << datos[initial] << endl;
+    
+    // Verificar paréntesis derecho y si solo hay una variable
+    if ((initial == final) && (datos[initial] == symbols[7])) {
         comforting.push_back(datos[initial]);
-    } else if ((datos[initial] != symbols[3]) && (flag))
-    {
-        
+    } else if (datos[initial] == symbols[8]) {
+        throw invalid_argument("FALTA DE PARENTESIS DERECHO");
+    } else if (datos[initial] != symbols[7]) {
         throw invalid_argument("SOLO DEBE HABER UNA VARIABLE.");
-
-    } else {
-        throw invalid_argument("Falta un parentesis derecho");
     }
+    
+    if (!isVariable) {
+        throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA.");
+    }
+    initial++;
 
-    /*for (int i = 0; i < comforting.size(); i++)
-    {
-        cout << comforting[i] << " ";
+    // Puedes activar esta sección para mostrar el contenido almacenado en comfortingx
+    /*for (const auto &item : comforting) {
+        cout << item << " ";
     }*/
+    
 }

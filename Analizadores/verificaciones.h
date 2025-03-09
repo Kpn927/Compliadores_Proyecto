@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include "lexico.h"
 using namespace std;
 class Check{
     public:
@@ -16,6 +17,10 @@ class Check{
     static bool matchOperator(const vector<string>& datos, size_t& i, const vector<string>& op);
 
     static bool verifyAsignation(Node<string>* actual);
+
+    static bool isReserved(string word);
+
+    static bool isVariable(string word);
 };
 
 bool Check::isIdentifier(const string& datos) {
@@ -99,6 +104,27 @@ bool Check::matchKeyword(const vector<string>& datos, size_t& i, const vector<st
         }
         i += keyword.size();
         return true;
+    }
+    return false;
+}
+
+bool Check::isReserved(string word){
+    // ¿como usar find con auto i?
+    int i;
+    i = count(reserved.begin(), reserved.end(), word);
+    if (i>0) return true;
+    i = count(dataType.begin(), dataType.end(), word);
+    if (i>0) return true;
+    i = count(identifiers.begin(), identifiers.end(), word);
+    if (i>0) return true;
+    i = count(symbols.begin(), symbols.end(), word);
+    if (i>0) return true;
+    return false;
+}
+
+bool Check::isVariable(string word){
+    for (const Variables& variable : variables) {
+        if (variable.name == word) return true;
     }
     return false;
 }

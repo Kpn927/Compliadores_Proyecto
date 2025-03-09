@@ -5,24 +5,27 @@ Syntax::Syntax() {}
 void Syntax::getSyntax(vector<string> &datos) {
 
     std::ios::sync_with_stdio(false);
-
-    if (datos.empty() || datos[0] != identifiers[6]) {
-        cout << "ERROR: Falta o esta escrito mal la palabra 'program'";
-        return;
-    }
-    
-    int initialNumber = 3;
-
-    if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
-        initialNumber++;
-        while(datos[initialNumber] != identifiers[4]){
-            getSyntaxVar(datos, symbols, initialNumber);
+    try{
+        if (datos.empty() || datos[0] != identifiers[6]) {
+            cout << "ERROR: Falta o esta escrito mal la palabra 'program'";
+            return;
         }
-    }
-
-    if (datos[initialNumber] == identifiers[4]) {
-        initialNumber++;
-        getSyntaxBegin(datos, symbols, initialNumber, true);
+        
+        int initialNumber = 3;
+    
+        if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
+            initialNumber++;
+            while(datos[initialNumber] != identifiers[4]){
+                getSyntaxVar(datos, symbols, initialNumber);
+            }
+        }
+    
+        if (datos[initialNumber] == identifiers[4]) {
+            initialNumber++;
+            getSyntaxBegin(datos, symbols, initialNumber, true);
+        }
+    } catch (const invalid_argument& e){
+        cerr<<"Error: "<< e.what()<<endl;
     }
 };
 
@@ -42,8 +45,7 @@ void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int 
                     cout << endl << "Codigo terminado";
                     return;
                 } else if (datos[initialNumber + 1] != ";") {
-                    cout << "Begin-End mal declarado" << endl;
-                    return;
+                    throw invalid_argument("Begin-End mal declarado");
                 } else {
                     cout << "Begin-End terminado" << endl;
                     initialNumber++;
@@ -122,8 +124,8 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &i
         {
             if (variables[i].name == a->getValue())
             {
-                cout << "ERROR: VARIABLE DOBLEMENTE DECLARADA." << endl;
-                exit(1);
+                cout<<"tumama";
+                throw invalid_argument("Variable doblemente declarada");
             }                    
         }
         newVariable.name = a->getValue();
@@ -141,15 +143,12 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &i
                 flag = false;
             } 
         }
-        if (flag)
-        {
-            cout << endl << "ERROR: EN LA DECLARACION DEL DATATYPE VARIABLE. " << endl;
-        }
-        
+        if (flag)throw invalid_argument("ERROR: EN LA DECLARACION DEL DATATYPE VARIABLE.");
+
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        throw invalid_argument(e.what());
     }
     
     try
@@ -194,8 +193,7 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &i
                     if ((variables[i].name == a->getLeft()->getValue()) || (variables[i].name == a->getRight()->getValue()))
                     {
                         flag = false;
-                        cout << "ERROR: VARIABLE YA DECLARADA." << endl;
-                        exit(1);
+                        throw invalid_argument("VARIABLE YA DECLARADA.");
                     }                    
                 }
             }
@@ -213,14 +211,13 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &i
                 }
                 
             } else {
-                cout << endl <<"ERROR: HP ARBOL HAY UNA FOKIN PALABRA RESERVADA" << endl;
-                return;
+                throw invalid_argument("ARBOL HAY UNA PALABRA RESERVADA");
             }    
         }
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        throw invalid_argument( e.what());
     }
     
         /* SIGUIENTE LINEA. */
@@ -295,34 +292,12 @@ void Syntax::getSyntaxAsignation(vector<string> &datos, vector<string> &symbols,
     Node<string> *a = arbolvar.getRaiz()->getRight();
     Node<string> *b = arbolvar.getRaiz()->getLeft();
 
-    try
-    {
-        bool flag = true;
-
-        for (int i = 0; i < variables.size(); i++)
-        {
-            if (b->getValue() == variables[i].name)
-            {
-                flag = false;
-            } 
-        }
-
-        if (flag)
-        {
-            cout << endl << "ERROR: NO PUSISTE UNA FOKIN VARIABLE" << endl;
-        }
-        
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
+    for (int i = 0; i < variables.size(); i++){
+        if (b->getValue() == variables[i].name) throw invalid_argument("ERROR: NO PUSISTE UNA FOKIN VARIABLE");
     }
     
-    if (!Check::verifyAsignation(arbolvar.getRaiz())){
-        cout<<"ERROR: NO PUSISTE BIEN LA ASIGNACION DE VARIABLE"<<endl;
-        return;
-    }
-        
+    if (!Check::verifyAsignation(arbolvar.getRaiz())) throw invalid_argument("NO PUSISTE BIEN LA ASIGNACION DE VARIABLE");
+
     initial = final+2;
     string value = (string) phraseAnalizer(arbolvar.getRaiz()->getRight());
     int i = 0;
@@ -368,52 +343,34 @@ int Syntax::forAnalizer(vector<string>& datos, int &i) {
 
     // 1.- Check for "for"
     if (i >= datos.size() || datos[i] != "for") {
-        cout << "ERROR: Hay un error en el bucle for (no hay for)" << endl;
-        return -1;
+        throw invalid_argument("Hay un error en el bucle for (no hay for)");
     }    
     i++;
 
     // 2.- Check for identifier
     if (!Check::isIdentifier(datos[i])) {
-        cout << "ERROR: Hay un error en el bucle for (no hay identificador)" << endl;
-        return -1;
+        throw invalid_argument("Hay un error en el bucle for (no hay identificador)");
     }
     i++;
         
     // 3.- Check for assignment operator ":="
-    if (i+1 >= datos.size() || datos[i] != ":=") {
-        cout << "ERROR: Hay un error en el bucle for (no hay :=)" << endl;
-        return -1;
-    }
+    if (i+1 >= datos.size() || datos[i] != ":=") throw invalid_argument("Hay un error en el bucle for (no hay :=)");
     i++;
     
     // 4.- Check for initial value (number)
-    if (!Check::isNumber(datos[i])) {
-        cout << "ERROR: Hay un error en el bucle for (valor inicial no es un numero)" << endl;
-        cout << datos[i];
-        return -1;
-    }
+    if (!Check::isNumber(datos[i])) throw invalid_argument("Hay un error en el bucle for (valor inicial no es un numero): "+datos[i]);
     i++;
     
     // 5.- Check for "to" or "downto"
-    if (i >= datos.size() || (datos[i] != "to" && datos[i] != "downto")) {
-        cout << "Hay un error en le bulcer for (no hay downto/to)" << endl;
-        return -1;
-    }
+    if (i >= datos.size() || (datos[i] != "to" && datos[i] != "downto")) throw invalid_argument("Hay un error en el bucle for (no hay downto/to)");
     i++;
 
     // 6.- Check for final value (number)
-    if (!Check::isNumber(datos[i])) {
-        cout << "ERROR: Hay un error en el bucle for (valor final no es un numero)" << endl;
-        return -1;
-    }
+    if (!Check::isNumber(datos[i])) throw invalid_argument("Hay un error en el bucle for (valor final no es un numero)");
     i++;
     
     // 7.- Check for "do"
-    if (i >= datos.size() || datos[i] != "do") {
-        cout << "ERROR: Hay un error en el bucle for (no hay do)" << endl;
-        return -1;
-    }
+    if (i >= datos.size() || datos[i] != "do") throw invalid_argument("Hay un error en el bucle for (no hay do)");
     i++;
     
     
@@ -426,10 +383,7 @@ int Syntax::forAnalizer(vector<string>& datos, int &i) {
 int Syntax::ifAnalizer(vector<string>& datos, int &i) {
     //size_t i = 0;
 
-    if (i >= datos.size() || datos[i] != "if") {
-        cout << "ERROR: Hay un error en el if (no hay if)" << endl;
-        return -1;
-    }
+    if (i >= datos.size() || datos[i] != "if") throw invalid_argument("Hay un error en el if (no hay if)");
     i++;
     if (datos[i] == "(") {
         i++;
@@ -438,10 +392,7 @@ int Syntax::ifAnalizer(vector<string>& datos, int &i) {
     while (i < datos.size() && datos[i] != ")" && datos[i] != "then") {
         if (!Check::isIdentifier(datos[i]) &&
             !isOperator(datos[i]) &&
-            !Check::isNumber(datos[i])) {
-                cout << "la condicion dentro del if esta mal" << endl;
-                return -1;
-            }
+            !Check::isNumber(datos[i])) throw invalid_argument("la condicion dentro del if esta mal");
             i++;
     }
     if (i >= datos.size() || datos[i] == ")") {
@@ -449,10 +400,7 @@ int Syntax::ifAnalizer(vector<string>& datos, int &i) {
     }
 
     // 3.- Check for "then"
-    if (i >= datos.size() || datos[i] != "then") {
-        cout << "ERROR: Hay un error en el if (no hay then)" << endl;
-        return -1;
-    }
+    if (i >= datos.size() || datos[i] != "then") throw invalid_argument("Hay un error en el if (no hay then)");
     i++;
 
     if (i < datos.size() && datos[i] != ";") {
@@ -552,12 +500,10 @@ string getString(vector<string> datos, int &initialNumber, int finalNumber) {
         if (initialNumber <= finalNumber && datos[initialNumber] == "\"") {
             value += datos[initialNumber];
         } else {
-            cout << "ERROR: Falta una comilla de cierre." << endl;
-            exit(1);
+            throw invalid_argument("Falta una comilla de cierre.");
         }
     } else {
-        cout << "ERROR: No se encontró una comilla inicial." << endl;
-        exit(1);
+        throw invalid_argument("No se encontró una comilla inicial");
     }
 
     return value;
@@ -574,8 +520,7 @@ void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, in
             something.push_back(datos[initial]);
             initial++;
         } else {
-            cout << "ERROR: Falta un parentesis izquierdo" << endl;
-            exit(1);
+            throw invalid_argument("Falta un parentesis izquierdo");
         }
 
         while (initial != final)
@@ -590,8 +535,8 @@ void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, in
     
                     if (datos[initial+1] == "\"")
                     {
-                        cout << "ERROR: NO PUEDEN EXISTIR 2 STRINGS PEGADOS.";
-                        exit(1);
+                        throw invalid_argument("NO PUEDEN EXISTIR 2 STRINGS PEGADOS.");
+
                     }
                     // si  
                 }
@@ -602,12 +547,12 @@ void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, in
                 {
                     if ((datos[initial-1] == symbols[2]) || (datos[initial+1] == symbols[3]))
                     {
-                        cout << "ERROR: EL MAS DEBE TENER VARIABLES O STRINGS ENTRE ELLA";
-                        exit(1);
+                        throw invalid_argument("EL MAS DEBE TENER VARIABLES O STRINGS ENTRE ELLA");
+
                     } else if ((datos[initial+1] == symbols[9]) || (datos[initial-1] == symbols[9]))
                     {
-                        cout << "ERROR: NO PUEDE HABER MAS DE 2 + JUNTOS.";
-                        exit(1);
+                        throw invalid_argument("NO PUEDE HABER MAS DE 2 + JUNTOS.");
+
                     } else
                     {
                         something.push_back(datos[initial]);
@@ -633,8 +578,7 @@ void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, in
                 }
                 if (!flag)
                 {
-                    cout << "ERROR: LO INGRESADO NO ES VARIABLE O NO HAY NADA." << endl;
-                    exit(1);
+                    throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA.");
                 }
             }
             initial++;
@@ -644,8 +588,7 @@ void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, in
         if ((initial == final) && (datos[initial] == symbols[3])) {
             something.push_back(datos[initial]);
         } else {
-            cout << "ERROR: Falta un parentesis derecho" << endl;
-            exit(1);
+            throw invalid_argument("Falta un parentesis derecho");
         }
 
         /*for (int i = 0; i < something.size(); i++)
@@ -672,8 +615,7 @@ void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int
 
     } else {
 
-        cout << "ERROR: Falta un parentesis izquierdo" << endl;
-        exit(1);
+        throw invalid_argument("Falta un parentesis izquierdo");
 
     }
 
@@ -694,8 +636,7 @@ void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int
 
     if (!flag)
     {
-        cout << "ERROR: LO INGRESADO NO ES VARIABLE O NO HAY NADA. " << endl;
-        exit(1);
+        throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA. ");
     }
     cout << datos[initial] << " and " << flag;
     if ((initial == final) && (datos[initial] == symbols[3])) {
@@ -703,12 +644,10 @@ void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int
     } else if ((datos[initial] != symbols[3]) && (flag))
     {
         
-        cout << "ERROR: SOLO DEBE HABER UNA VARIABLE. ";
-        exit(1);
+        throw invalid_argument("SOLO DEBE HABER UNA VARIABLE.");
 
     } else {
-        cout << "ERROR: Falta un parentesis derecho" << endl;
-        exit(1);
+        throw invalid_argument("Falta un parentesis derecho");
     }
 
     /*for (int i = 0; i < comforting.size(); i++)

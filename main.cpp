@@ -18,29 +18,7 @@ int main() {
 
     vector<string> tokens = tokenize(datos);
 
-    //PrintingTokens(tokens);
     Syntax sintactico;
-
-    // BEGIN TESTING
-    // if x then begin x := x + 1; end;
-    /*vector<string> code = {"i", "f", "x", "t", "h", "e", "n"};
-    int ifanalizer = sintactico.ifAnalizer(code);
-    
-    // for i := 0 to 150 do begin x := x + 1; writeln(x); end;
-    vector<string> code2 = {"f", "o", "r", "i", ":", "=", "0", "t", "o", "150", "d", "o"};
-    int analizer = sintactico.forAnalizer(code2);
-    
-
-    vector<string> code3 = {"/* Comentario"};
-    sintactico.CommentAnalizer(code3);
-    // END TESTING
-    
-    //sintactico.CommentAnalizer(datos);
-    // vector<string> forsito = sintactico.extractBlock(datos);
-    // if (forsito.empty()) {
-    //     cout << "No hay bucle for que triste" << endl;
-    // }
-    // sintactico.forAnalizer(forsito);*/
     
     sintactico.getSyntax(tokens);
 

@@ -10,11 +10,18 @@
 
 class Syntax{
     private:
+
     // Método para obtener el final de la linea plantado por un punto y coma
     int getFinalNumber(int initialNumber, vector<string> &datos);
 
+    // Analizador de for
+    int forAnalizer(vector<string>& datos, int &i);
+
+    // Analizador de if
+    int ifAnalizer(vector<string>& datos, int &i);
+    
     // Método para sintaxis de Begin-End
-    void getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal);
+    void getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure);
 
     // Método para crear los árboles
     void recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<string> &datos, int initialNumber, int finalNumber);
@@ -27,13 +34,10 @@ class Syntax{
 
     //sintaxis de Asignaciones x:=1;
     void getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int &initial);
-
-    // Analizador de for
-    int forAnalizer(vector<string>& datos, int &i);
-
-    // Analizador de if
-    int ifAnalizer(vector<string>& datos, int &i);
-
+    
+    // sintaxis de la funcion procedure
+    void getSyntaxprocedure(vector<string> &datos, vector<string> &symbols, int &initial);
+    
     // Analizador de writeln
     void getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int &initial);
 
@@ -42,7 +46,9 @@ class Syntax{
 
     string phraseAnalizer(Node<string> *nodo);
 
+    // Función auxiliar para verificar palabras reservadas o valores inválidos
     bool isReservedOrInvalid(const string &value);
+
 
     public:
     Syntax();

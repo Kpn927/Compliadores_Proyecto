@@ -1,7 +1,15 @@
 program Hola;
+
+procedure();
+var
+    x:integer;
+begin
+    writeln("");
+end;
+
 var 
     x,y,z,y1:integer;
-    ELPEPEMAGICO:double;
+    w:double;
 begin
 
      x := 0;
@@ -16,8 +24,7 @@ for x := 0 to 150 do
         x := x + 1;
     end;
 
-    writeln(x);
-    readln(x);
+    writeln("");
 
     x := x + 1;
     y1 := 10;

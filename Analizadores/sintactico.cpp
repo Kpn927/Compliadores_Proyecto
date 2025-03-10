@@ -4,15 +4,19 @@ Syntax::Syntax() {}
 
 void Syntax::getSyntax(vector<string> &datos) {
 
-    std::ios::sync_with_stdio(false);
     try{
+
         if (datos.empty() || datos[0] != identifiers[6]) throw invalid_argument("Falta o esta escrito mal la palabra 'program'");
         if (datos[2] != ";") throw invalid_argument("Falta ';' en declaración de program");
         if (Check::isReserved(datos[1])) throw invalid_argument("declaración de Program tiene una palabra reservada");
         reserved.push_back(datos[1]);
 
         int initialNumber = 3;
-    
+        
+        if (datos[initialNumber] == identifiers[2]) {
+            getSyntaxprocedure(datos, symbols, initialNumber);
+        }
+        
         if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
             initialNumber++;
             while(datos[initialNumber] != identifiers[4]){
@@ -22,7 +26,7 @@ void Syntax::getSyntax(vector<string> &datos) {
     
         if (datos[initialNumber] == identifiers[4]) {
             initialNumber++;
-            getSyntaxBegin(datos, symbols, initialNumber, true);
+            getSyntaxBegin(datos, symbols, initialNumber, true, false);
         }
     } catch (const invalid_argument& e){
         cerr<<"Error: "<< e.what()<<endl;
@@ -37,8 +41,20 @@ int Syntax::getFinalNumber(int finalNumber, vector<string> &datos){
     return finalNumber;
 }
 
-void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal) {
+void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure) {
     bool final = true;
+
+    if (isProcedure) {
+        if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
+            initialNumber++;
+            while(datos[initialNumber] != identifiers[4]){
+                getSyntaxVar(datos, symbols, initialNumber);
+            }
+        }
+        initialNumber++;
+        isProcedure = false;
+    }
+    
     while (final) {
         if (datos[initialNumber] == "end") { 
             if (initialNumber + 1 < datos.size()) {
@@ -50,13 +66,14 @@ void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int 
                 } else {
                     cout << "Begin-End terminado" << endl;
                     initialNumber++;
+                    final = false;
                     if (!isPrincipal) return;
                 }
             }
-        } 
+        }
         else if (datos[initialNumber] == "begin") {
             initialNumber++;
-            getSyntaxBegin(datos, symbols, initialNumber, false);
+            getSyntaxBegin(datos, symbols, initialNumber, false, false);
         }
         else if (datos[initialNumber] == "if") {
             //cout << "Analizando el if" << endl;
@@ -99,7 +116,7 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &i
     // Verificar si 'a' contiene un valor válido
     if (!a->getValue().empty()) {
         if (std::any_of(variables.begin(), variables.end(), [&](const Variables &var) { return var.name == a->getValue(); })) {
-            throw invalid_argument("Variable doblemente declarada");
+            throw invalid_argument("VARIABLE DOBLEMENTE DECLARADA.");
         }
         newVariable.name = a->getValue();
         variables.push_back(newVariable);
@@ -107,7 +124,7 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &i
 
     // Validar si el valor en 'b' es un tipo de dato válido
     if (std::none_of(dataType.begin(), dataType.end(), [&](const string &type) { return b->getValue() == type; })) {
-        throw invalid_argument("ERROR: EN LA DECLARACION DEL DATATYPE VARIABLE.");
+        throw invalid_argument("EN LA DECLARACION DEL DATATYPE VARIABLE.");
     }
 
     // Validar variables y palabras reservadas en el árbol
@@ -137,7 +154,6 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &i
     initial = final + 2;
 }
 
-// Función auxiliar para verificar palabras reservadas o valores inválidos
 bool Syntax::isReservedOrInvalid(const string &value) {
     return std::any_of(reserved.begin(), reserved.end(), [&](const string &reservedWord) { return reservedWord == value; }) ||
            std::any_of(identifiers.begin(), identifiers.end(), [&](const string &identifier) { return identifier == value; }) ||
@@ -296,7 +312,7 @@ int Syntax::ifAnalizer(vector<string>& datos, int &i) {
     if (i < datos.size() && datos[i] != ";") {
         if (datos[i] == "begin") {
             i++;
-            getSyntaxBegin(datos, symbols, i, false);
+            getSyntaxBegin(datos, symbols, i, false, false);
             
         } else if (datos[i] == "if"){
             int result = ifAnalizer(datos, i);
@@ -374,7 +390,7 @@ void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<stri
     return;
 }
 
-string getString(vector<string> datos, int &initialNumber, int finalNumber) {
+string getString(vector<string> datos, int &initialNumber, int &finalNumber) {
 
     string value = "";
 
@@ -385,90 +401,104 @@ string getString(vector<string> datos, int &initialNumber, int finalNumber) {
         while (initialNumber <= finalNumber && datos[initialNumber] != "\"") {
             value += datos[initialNumber];
             initialNumber++;
+            if (datos[initialNumber] == "\"") {
+                finalNumber = initialNumber;
+                break;
+            }
         }
 
         if (initialNumber <= finalNumber && datos[initialNumber] == "\"") {
             value += datos[initialNumber];
         } else {
-            throw invalid_argument("Falta una comilla de cierre.");
+            cout << "Falta una comilla de cierre." << endl;
+            exit(1);
         }
     } else {
-        throw invalid_argument("No se encontró una comilla inicial");
+        cout << "No se encontró una comilla inicial" << endl;
     }
 
     return value;
 }
 
 void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int &initial) {
-    unsigned int final = getFinalNumber(initial, datos);
-    try {
-        initial++;
-        vector<string> something;
+    int final = getFinalNumber(initial, datos);
+    initial++;
 
-        if (datos[initial] == symbols[6]) {
+    vector<string> something;
+
+    if (datos[initial] == symbols[6]) {
+        something.push_back(datos[initial]);
+        initial++;
+    } else {
+        throw invalid_argument("ERROR: FALTA UN PARENTESIS IZQUIERDO.");
+    }
+    if (datos[initial] == symbols[7]) {
+        throw invalid_argument("ERROR: NO HAY NADA EN EL WRITELN");
+    }
+        
+    while (initial != final) {
+            
+        if (datos[initial] == "\"") {
+            string value = getString(datos, initial, final);
+            initial = final;
+            if (datos[initial] == "\"") {
+                initial++;
+            }
+            final = getFinalNumber(initial, datos);
+            something.push_back(value);
+            if (datos[initial] == "\"") {
+                throw invalid_argument("NO PUEDEN EXISTIR 2 STRINGS PEGADOS.");
+            }
+            continue;
+        }
+            
+        if (datos[initial] == symbols[2]) {
+            if ((datos[initial - 1] == symbols[6]) || (datos[initial + 1] == symbols[7])) {
+                throw invalid_argument("EL MAS DEBE TENER VARIABLES O STRINGS ENTRE ELLA");
+            } else if ((datos[initial + 1] == symbols[2]) || (datos[initial - 1] == symbols[2])) {
+                throw invalid_argument("NO PUEDE HABER MAS DE 2 + JUNTOS.");
+            }
             something.push_back(datos[initial]);
             initial++;
-        } else {
-            throw invalid_argument("ERROR: FALTA UN PARENTESIS IZQUIERDO.");
+            continue;
+        }
+            
+        if ((datos[initial] == symbols[7])) {
+            if (datos[initial+1]!= symbols[8]) {
+                throw invalid_argument("ERROR: FALTA UN ; .");
+            }   
+        }
+        bool isVariable = false;
+        for (const auto &variable : variables) {
+            if (datos[initial] == variable.name) {
+                something.push_back(datos[initial]);
+                isVariable = true;
+                initial++;
+                break;
+            }
+        }
+        if (!isVariable) {
+            throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA.");
         }
         
-        while (initial != final) {
-            if (datos[initial] == "\"") {
-                string value = getString(datos, initial, final);
-                something.push_back(value);
-                if (datos[initial + 1] == "\"") {
-                    throw invalid_argument("NO PUEDEN EXISTIR 2 STRINGS PEGADOS.");
-                }
-                continue;
-            }
-
-            if (datos[initial] == symbols[2]) {
-                if ((datos[initial - 1] == symbols[6]) || (datos[initial + 1] == symbols[7])) {
-                    throw invalid_argument("EL MAS DEBE TENER VARIABLES O STRINGS ENTRE ELLA");
-                } else if ((datos[initial + 1] == symbols[2]) || (datos[initial - 1] == symbols[2])) {
-                    throw invalid_argument("NO PUEDE HABER MAS DE 2 + JUNTOS.");
-                }
-                something.push_back(datos[initial]);
-                continue;
-            }
-
-            if ((datos[initial] == symbols[7])) {
-                if (datos[initial+1]!= symbols[8]) {
-                    throw invalid_argument("ERROR: FALTA UN ; .");
-                }   
-            }
-
-            bool isVariable = false;
-            for (const auto &variable : variables) {
-                if (datos[initial] == variable.name) {
-                    something.push_back(datos[initial]);
-                    isVariable = true;
-                    break;
-                }
-            }
-
-            if (!isVariable) {
-                throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA.");
-            }
-
-            initial++;
+        if (initial == final) {
+            break;
         }
-    
-        if ((initial == final) && (datos[initial] == symbols[7])) {
-            something.push_back(datos[initial]);
-            
-        } else {
-            throw invalid_argument("Falta un parentesis derecho");
-        }
-
         initial++;
-
-        /*for (const auto &item : something) {
-            cout << item << " ";
-        }*/
-    } catch (const std::exception &e) {
-        std::cerr << e.what() << '\n';
     }
+        
+    if ((initial == final) && (datos[initial] == symbols[7])) {
+        something.push_back(datos[initial]);
+            
+    } else {
+        throw invalid_argument("Falta un parentesis derecho");
+    }
+
+        
+    initial++;
+    /*for (const auto &item : something) {
+        cout << item << " ";
+    }*/
 }
 
 void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int &initial) {
@@ -500,7 +530,7 @@ void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int
         comforting.push_back(datos[initial]);
     } else if (datos[initial] == symbols[8]) {
         throw invalid_argument("FALTA DE PARENTESIS DERECHO");
-    } else if (datos[initial] != symbols[7]) {
+    } else if (datos[initial+1] != symbols[7]) {
         throw invalid_argument("SOLO DEBE HABER UNA VARIABLE.");
     }
     
@@ -514,4 +544,21 @@ void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int
         cout << item << " ";
     }*/
     
+}
+
+void Syntax::getSyntaxprocedure(vector<string> &datos, vector<string> &symbols, int &initial) {
+    int final = getFinalNumber(initial, datos);
+    if (datos[final] != ")")
+    {
+        throw invalid_argument("Falta un parentesis derecho");
+    }
+
+    if (datos[initial+1] != "(")
+    {
+        throw invalid_argument("Falta un parentesis derecho");
+    }
+    initial = final + 2;
+    getSyntaxBegin(datos, symbols, initial, false, true);
+    variables.clear();
+    initial++;
 }

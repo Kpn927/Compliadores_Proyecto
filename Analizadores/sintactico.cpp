@@ -423,7 +423,6 @@ string getString(vector<string> datos, int &initialNumber, int &finalNumber) {
 void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int &initial) {
     int final = getFinalNumber(initial, datos);
     initial++;
-
     vector<string> something;
 
     if (datos[initial] == symbols[6]) {
@@ -489,16 +488,11 @@ void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, in
         
     if ((initial == final) && (datos[initial] == symbols[7])) {
         something.push_back(datos[initial]);
-            
     } else {
         throw invalid_argument("Falta un parentesis derecho");
     }
 
-        
     initial++;
-    /*for (const auto &item : something) {
-        cout << item << " ";
-    }*/
 }
 
 void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int &initial) {
@@ -538,11 +532,6 @@ void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int
         throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA.");
     }
     initial++;
-
-    // Puedes activar esta sección para mostrar el contenido almacenado en comfortingx
-    /*for (const auto &item : comforting) {
-        cout << item << " ";
-    }*/
     
 }
 

@@ -42,6 +42,8 @@ class Syntax{
 
     string phraseAnalizer(Node<string> *nodo);
 
+    bool isReservedOrInvalid(const string &value);
+
     public:
     Syntax();
 

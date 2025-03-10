@@ -82,127 +82,68 @@ void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int 
 void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &initial) {
     int final = getFinalNumber(initial, datos);
     Tree<string> arbolvar;
-    
-    if (datos[initial] == identifiers[0])
-    {
+
+    // Avanzar si es un identificador válido
+    if (datos[initial] == identifiers[0]) {
         initial++;
     }
-    
-    arbolvar.insertarOrdenado("",0);
+
+    arbolvar.insertarOrdenado("", 0);
 
     recursiveTree(arbolvar, datos, initial, final);
-
-    //arbolvar.orden(arbolvar.getRaiz(), true);
 
     Node<string> *a = arbolvar.getRaiz()->getLeft();
     Node<string> *b = arbolvar.getRaiz()->getRight();
     Variables newVariable;
 
-    if (a->getValue() != "")
-    {
-        for (int i = 0; i < variables.size(); i++)
-        {
-            if (variables[i].name == a->getValue())
-            {
-                cout<<"tumama";
-                throw invalid_argument("Variable doblemente declarada");
-            }                    
+    // Verificar si 'a' contiene un valor válido
+    if (!a->getValue().empty()) {
+        if (std::any_of(variables.begin(), variables.end(), [&](const Variables &var) { return var.name == a->getValue(); })) {
+            throw invalid_argument("Variable doblemente declarada");
         }
         newVariable.name = a->getValue();
         variables.push_back(newVariable);
     }
-    
-    try
-    {
-        bool flag = true;
 
-        for (int i = 0; i < dataType.size(); i++)
-        {
-            if (b->getValue() == dataType[i])
-            {
-                flag = false;
-            } 
+    // Validar si el valor en 'b' es un tipo de dato válido
+    if (std::none_of(dataType.begin(), dataType.end(), [&](const string &type) { return b->getValue() == type; })) {
+        throw invalid_argument("ERROR: EN LA DECLARACION DEL DATATYPE VARIABLE.");
+    }
+
+    // Validar variables y palabras reservadas en el árbol
+    while (a->getRight() != nullptr) {
+        if (isReservedOrInvalid(a->getLeft()->getValue()) || isReservedOrInvalid(a->getRight()->getValue())) {
+            throw invalid_argument("ARBOL HAY UNA PALABRA RESERVADA");
         }
-        if (flag)throw invalid_argument("ERROR: EN LA DECLARACION DEL DATATYPE VARIABLE.");
 
-    }
-    catch(const std::exception& e)
-    {
-        throw invalid_argument(e.what());
-    }
-    
-    try
-    {
-        bool flag = true;
-        while (a->getRight() != NULL)
-        {    
-            for (int i = 0; i < reserved.size(); i++)
-            {
-                if ((reserved[i] == a->getLeft()->getValue()) || (reserved[i] == a->getRight()->getValue()))
-                {
-                    flag = false;
-                }                    
-            }
-            
-            if (flag)
-            {
-                for (int i = 0; i < identifiers.size(); i++)
-                {
-                    if ((identifiers[i] == a->getLeft()->getValue()) || (identifiers[i] == a->getRight()->getValue()))
-                    {
-                        flag = false;
-                    }                    
-                }
-            }
-            
-            if (flag)
-            {
-                for (int i = 0; i < dataType.size(); i++)
-                {
-                    if ((dataType[i] == a->getLeft()->getValue()) || (dataType[i] == a->getRight()->getValue()))
-                    {
-                        flag = false;
-                    }                    
-                }
-            }
-            
-            if (flag)
-            {
-                for (int i = 0; i < variables.size(); i++)
-                {
-                    if ((variables[i].name == a->getLeft()->getValue()) || (variables[i].name == a->getRight()->getValue()))
-                    {
-                        flag = false;
-                        throw invalid_argument("VARIABLE YA DECLARADA.");
-                    }                    
-                }
-            }
+        if (std::any_of(variables.begin(), variables.end(), [&](const Variables &var) {
+                return var.name == a->getLeft()->getValue() || var.name == a->getRight()->getValue();
+            })) {
+            throw invalid_argument("VARIABLE YA DECLARADA.");
+        }
 
-            if (flag)  
-            {
-                newVariable.name = a->getLeft()->getValue();
-                variables.push_back(newVariable);
-                a = a->getRight();
+        newVariable.name = a->getLeft()->getValue();
+        variables.push_back(newVariable);
 
-                if (a->getValue() != "")
-                {   
-                    newVariable.name = a->getValue();
-                    variables.push_back(newVariable);
-                }
-                
-            } else {
-                throw invalid_argument("ARBOL HAY UNA PALABRA RESERVADA");
-            }    
+        a = a->getRight();
+
+        if (!a->getValue().empty()) {
+            newVariable.name = a->getValue();
+            variables.push_back(newVariable);
         }
     }
-    catch(const std::exception& e)
-    {
-        throw invalid_argument( e.what());
-    }
-    
-        /* SIGUIENTE LINEA. */
-        initial = final + 2;
+
+    // Avanzar a la siguiente línea
+    initial = final + 2;
 }
+
+// Función auxiliar para verificar palabras reservadas o valores inválidos
+bool Syntax::isReservedOrInvalid(const string &value) {
+    return std::any_of(reserved.begin(), reserved.end(), [&](const string &reservedWord) { return reservedWord == value; }) ||
+           std::any_of(identifiers.begin(), identifiers.end(), [&](const string &identifier) { return identifier == value; }) ||
+           std::any_of(dataType.begin(), dataType.end(), [&](const string &type) { return type == value; });
+}
+
 
 string Syntax::phraseAnalizer(Node<string> *nodo){
     if (nodo->getRight()==NULL){
@@ -553,9 +494,6 @@ void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int
             break;
         }
     }
-
-    
-    cout << datos[initial] << endl;
     
     // Verificar paréntesis derecho y si solo hay una variable
     if ((initial == final) && (datos[initial] == symbols[7])) {

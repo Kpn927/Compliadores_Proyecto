@@ -1,7 +1,7 @@
 program Hola;
 var 
     x,y,z,y1:integer;
-    ELPEPEMAGICO:double;
+    w:double;
 begin
 
      x := 0;

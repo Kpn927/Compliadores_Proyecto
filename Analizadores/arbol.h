@@ -50,6 +50,10 @@ public:
         actual=raiz;
     }
 
+    ~Tree(){
+        this->bucleBorrar(this->getRaiz());
+    }
+
     void insertarOrdenado(T valor, int rama, Node<T>* actual);
 
     void insertarOrdenado(T valor, int rama);

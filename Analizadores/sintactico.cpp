@@ -181,6 +181,9 @@ string Syntax::phraseAnalizer(Node<string> *nodo){
     }
     int i = 0;
     float *left, *right , result;
+    if (Check::isNumber(nodo->getCenter()->getValue()) || Check::isVariable(nodo->getCenter()->getValue())){
+        return (nodo->getCenter()->getValue());
+    }
     if(Check::isNumber(nodo->getLeft()->getValue())){
          left = new float;
         *left =std::stof(nodo->getLeft()->getValue());
@@ -336,8 +339,6 @@ int Syntax::ifAnalizer(vector<string>& datos, int &i) {
     return i;
 }
 
-
-
 void Syntax::recursiveTree(Tree<string>&padre, vector<string> &datos, int initialNumber, int finalNumber){
     recursiveTree(padre.getRaiz(), padre, symbols, datos, initialNumber, finalNumber);
     return;
@@ -347,16 +348,14 @@ void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<stri
     // detectar separador
     int symbol, j, lastParentesis;
     if (actual==NULL) return;
+    if (initialNumber+1 == finalNumber) throw invalid_argument("Asignacion mal colocada");
     if (datos[initialNumber]=="("){
-        lastParentesis=initialNumber+2;
-        while(datos[lastParentesis]!=")"){
-            lastParentesis++;
-        }
+        lastParentesis= Check::getLastParentesis(initialNumber, datos);
         if (lastParentesis ==finalNumber){
             padre.insertarOrdenado(datos[initialNumber],0,actual);
             padre.insertarOrdenado(datos[lastParentesis],2,actual);
-            if(finalNumber-initialNumber== 1) cout<<"NADA ENTRE LOS PARENTESIS"<<endl;
-            else if(finalNumber-initialNumber== 2) padre.insertarOrdenado(datos[finalNumber],1,actual);
+            if(finalNumber-initialNumber== 1) throw invalid_argument("NADA ENTRE LOS PARENTESIS");
+            else if(finalNumber-initialNumber== 2) padre.insertarOrdenado(datos[finalNumber-1],1,actual);
             else if(finalNumber-initialNumber> 2) {
                 padre.insertarOrdenado("", 1, actual);
                 recursiveTree(actual->getCenter(), padre, symbols, datos, initialNumber+1, finalNumber-1);
@@ -410,11 +409,10 @@ string getString(vector<string> datos, int &initialNumber, int &finalNumber) {
         if (initialNumber <= finalNumber && datos[initialNumber] == "\"") {
             value += datos[initialNumber];
         } else {
-            cout << "Falta una comilla de cierre." << endl;
-            exit(1);
+            throw invalid_argument("Falta una comilla de cierre.");
         }
     } else {
-        cout << "No se encontró una comilla inicial" << endl;
+        throw invalid_argument("No se encontró una comilla inicial");
     }
 
     return value;

@@ -25,6 +25,12 @@ struct Variables{
     string value;
 };
 
+struct Datos{
+    string dato;
+    int linea;
+    int columna;
+};
+
 vector<string> reserved = {"if", "then", "to", "do", "downto", "writeln", "readln"};
 vector<string> operators = {"+", "-", "*", "/", ":=", "=", ">", "<", ">=", "<=", "==", "!=", "++",":"};
 vector<string> dataType = {"integer", "real", "character", "array", "boolean", "double"};
@@ -36,7 +42,7 @@ vector<string> symbols = {":=",":", "+", "-", "*", "/","(", ")", ";",  ",", ".",
 
 void show_vector(const vector<string>& v);
 void PrintingTokens(const vector<string>& v);
-vector<string> tokenize(string& input);
+vector<Datos> tokenize(string& input);
 void PushToVariable(vector<string>& variables, const string& v);
 void deleteComments(string searchWord, string endWord, string &datos);
 
@@ -155,40 +161,54 @@ void PrintingTokens(const vector<string>& v) {
     }
 }
 
-vector<string> tokenize(string& input) {
+vector<Datos> tokenize(string& input) {
     deleteComments("//","\n",input, -1);
     deleteComments("(*","*)",input, -1);
     deleteComments("{","}",input, -1);
-    vector<string> tokens;
-    string token;
+    vector<Datos> tokens;
+    Datos* token = new Datos;
+    int linea=1, columna=0;
     for (size_t i = 0; i < input.size(); i++) {
         char ch = input[i];
+        columna++;
+        if (token==NULL) token = new Datos;
         if (isspace(ch)) {
-            if (!token.empty()) {
-                tokens.push_back(token);
-                token.clear();
+            if (! token->dato.empty()) {
+                token->linea = linea;
+                token->columna = (columna - (token->dato.size()));
+                tokens.push_back(*token);
+                delete token;
+                token = NULL;
             }
         } else if (isalnum(ch) || ch == '_') {
-            token += ch;
+            token->dato += ch;
         } else {
-            if (!token.empty()) {
-                tokens.push_back(token);
-                token.clear();
+            if (!token->dato.empty()) {
+                token->linea = linea;
+                token->columna = (columna - (token->dato.size()));
+                tokens.push_back(*token);
+                delete token;
+                token = NULL;
             }
             if (i + 1 < input.size()) {
-                string potentialOperator = string(1, ch) + input[i + 1];
-                if (isOperator(potentialOperator)) {
+                Datos potentialOperator = {string(1, ch) + input[i + 1], linea, (int) (columna - potentialOperator.dato.size() + 1)};
+                if (isOperator(potentialOperator.dato)) {
                     tokens.push_back(potentialOperator);
                     i++;
                     continue;
                 }
             }
-            tokens.push_back(string(1, ch));
+            tokens.push_back({string(1, ch), linea, columna});
+        }
+        if (ch=='\n'){
+            columna = 0;
+            linea++;
         }
     }
-    if (!token.empty()) {
-        tokens.push_back(token);
+    if (token==NULL) {
+        tokens.push_back(*token);
     }
+    delete token;
     return tokens;
 }
 

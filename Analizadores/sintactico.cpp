@@ -213,8 +213,10 @@ string Syntax::phraseAnalizer(Node<string> *nodo){
         if (nodo->getCenter()->getValue() == "-") result = *left - *right;
         if (nodo->getCenter()->getValue() == "*") result = *left * *right;
         if (nodo->getCenter()->getValue() == "/") result = *left / *right;
+        delete left, right;
         return (string)std::to_string(result);
     } else{
+        delete left, right;
         return nodo->getLeft()->getValue() + " " + nodo->getCenter()->getValue() + " " + nodo->getRight()->getValue();
     }
 }

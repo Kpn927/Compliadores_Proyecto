@@ -21,7 +21,20 @@ class Check{
     static bool isReserved(string word);
 
     static bool isVariable(string word);
+
+    static int getLastParentesis (int initial, vector<string> datos);
 };
+
+int Check::getLastParentesis(int initial, vector<string> datos){
+    initial++;
+    while (datos[initial] != ")"){
+        if (datos[initial]=="("){
+            initial = Check::getLastParentesis(initial, datos);
+        }
+        initial++;
+    }
+    return initial;
+}
 
 bool Check::isIdentifier(const string& datos) {
     return (!datos.empty() && isalpha(datos[0]));
@@ -32,13 +45,14 @@ bool Check::verifyAsignation(Node<string>* actual){
     if((actual->getCenter()->getValue() == "")){
         center = Check::verifyAsignation(actual->getCenter());
         return center;
-    }
+    }else if (Check::isNumber(actual->getCenter()->getValue())) return true;
     if((actual->getLeft()->getValue() == "")) left = Check::verifyAsignation(actual->getLeft());
     else if(Check::isNumber(actual->getLeft()->getValue())) left = true;
     if((actual->getRight()->getValue() == "")) right = Check::verifyAsignation(actual->getRight());
     else if(Check::isNumber(actual->getRight()->getValue())) right = true;
     for (int i = 0; i < variables.size(); i++){
         if (left == false && variables[i].name == actual->getLeft()->getValue()) left = true;
+        if (variables[i].name == actual->getCenter()->getValue()) return true;
         if (right == false && variables[i].name == actual->getRight()->getValue()) right = true;     
     }
     if (left==true && right==true) return true;

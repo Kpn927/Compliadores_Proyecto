@@ -223,14 +223,14 @@ Node<T>* Tree<T>::bucleObtenerBorrar(T valor, nodePtr nodoTemp){
 template <class T>
 void Tree<T>::bucleBorrar(nodePtr nodoTemp){
     if (nodoTemp==NULL) return;
+    if (nodoTemp==raiz) raiz = NULL;
 
-    if(nodoTemp->izquierda != NULL && nodoTemp->centro != NULL && nodoTemp->derecha != NULL){
-        bucleBorrar(nodoTemp->izquierda);
-        bucleBorrar(nodoTemp->centro);
-        bucleBorrar(nodoTemp->derecha);
-    }
+    if(nodoTemp->izquierda !=NULL) bucleBorrar(nodoTemp->izquierda);
+    if(nodoTemp->centro !=NULL) bucleBorrar(nodoTemp->centro);
+    if(nodoTemp->derecha !=NULL) bucleBorrar(nodoTemp->derecha);
 
     delete nodoTemp;
+    nodoTemp ==NULL;
     return;
 }
 

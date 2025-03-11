@@ -95,15 +95,17 @@ bool isNumber(const string& word) {
     return !word.empty();
 }
 
-void deleteComments(string searchWord, string endWord, string &datos){
-    size_t startPos = datos.find(searchWord);
+void deleteComments(string searchWord, string endWord, string &datos, int position){
+    size_t startPos;
+    if (position==-1) startPos = datos.find(searchWord);
+    else startPos = position;
     if (startPos != std::string::npos) {
         
         size_t finalPos = datos.find(endWord, startPos);
         if (finalPos != std::string::npos) {
             size_t lengthToRemove = finalPos - startPos;
             datos.erase(startPos, lengthToRemove+ endWord.size());
-            deleteComments(searchWord, endWord, datos);
+            if (position==-1) deleteComments(searchWord, endWord, datos, position);
         } else {
             cout << "'*/' not found after '/*'" << std::endl;
         }
@@ -154,9 +156,9 @@ void PrintingTokens(const vector<string>& v) {
 }
 
 vector<string> tokenize(string& input) {
-    deleteComments("//","\n",input);
-    deleteComments("(*","*)",input);
-    deleteComments("{","}",input);
+    deleteComments("//","\n",input, -1);
+    deleteComments("(*","*)",input, -1);
+    deleteComments("{","}",input, -1);
     vector<string> tokens;
     string token;
     for (size_t i = 0; i < input.size(); i++) {

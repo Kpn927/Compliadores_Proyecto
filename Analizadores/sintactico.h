@@ -12,37 +12,37 @@ class Syntax{
     private:
 
     // Método para obtener el final de la linea plantado por un punto y coma
-    int getFinalNumber(int initialNumber, vector<string> &datos);
+    int getFinalNumber(int initialNumber, vector<Datos> &datos);
 
     // Analizador de for
-    int forAnalizer(vector<string>& datos, int &i);
+    int forAnalizer(vector<Datos>& datos, int &i);
 
     // Analizador de if
-    int ifAnalizer(vector<string>& datos, int &i);
+    int ifAnalizer(vector<Datos>& datos, int &i);
     
     // Método para sintaxis de Begin-End
-    void getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure);
+    void getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure);
 
     // Método para crear los árboles
-    void recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<string> &datos, int initialNumber, int finalNumber);
+    void recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<Datos> &datos, int initialNumber, int finalNumber);
 
     // Overload de recursive Tree con menos argumentos
-    void recursiveTree(Tree<string>&padre, vector<string> &datos, int initialNumber, int finalNumber);
+    void recursiveTree(Tree<string>&padre, vector<Datos> &datos, int initialNumber, int finalNumber);
 
     //Sintaxis de Var en Pascal
-    void getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &initial);
+    void getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &initial);
 
     //sintaxis de Asignaciones x:=1;
-    void getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int &initial);
+    void getSyntaxAsignation(vector<Datos> &datos, vector<string> &symbols, int &initial);
     
     // sintaxis de la funcion procedure
-    void getSyntaxprocedure(vector<string> &datos, vector<string> &symbols, int &initial);
+    void getSyntaxprocedure(vector<Datos> &datos, vector<string> &symbols, int &initial);
     
     // Analizador de writeln
-    void getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int &initial);
+    void getSyntaxwriteln(vector<Datos> &datos, vector<string> &symbols, int &initial);
 
     // Analizador del readln
-    void getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int &initial);
+    void getSyntaxreadln(vector<Datos> &datos, vector<string> &symbols, int &initial);
 
     string phraseAnalizer(Node<string> *nodo);
 
@@ -54,7 +54,7 @@ class Syntax{
     Syntax();
 
     //Método para la obteción principal del Syntax
-    void getSyntax(vector<string> &datos);
+    void getSyntax(vector<Datos> &datos);
     
 };
 

@@ -22,13 +22,13 @@ class Check{
 
     static bool isVariable(string word);
 
-    static int getLastParentesis (int initial, vector<string> datos);
+    static int getLastParentesis (int initial, vector<Datos> datos);
 };
 
-int Check::getLastParentesis(int initial, vector<string> datos){
+int Check::getLastParentesis(int initial, vector<Datos> datos){
     initial++;
-    while (datos[initial] != ")"){
-        if (datos[initial]=="("){
+    while (datos[initial].dato != ")"){
+        if (datos[initial].dato=="("){
             initial = Check::getLastParentesis(initial, datos);
         }
         initial++;

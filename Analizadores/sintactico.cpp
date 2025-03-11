@@ -1,53 +1,53 @@
 #include "sintactico.h"
 #include "verificaciones.h"
+#include "error.h"
 Syntax::Syntax() {}
 
-void Syntax::getSyntax(vector<string> &datos) {
+void Syntax::getSyntax(vector<Datos> &datos) {
 
     try{
 
-        if (datos.empty() || datos[0] != identifiers[6]) throw invalid_argument("Falta o esta escrito mal la palabra 'program'");
-        if (datos[2] != ";") throw invalid_argument("Falta ';' en declaración de program");
-        if (Check::isReserved(datos[1])) throw invalid_argument("declaración de Program tiene una palabra reservada");
-        reserved.push_back(datos[1]);
+        if (datos.empty() || datos[0].dato != identifiers[6]) throw CompilatorError("Falta o esta escrito mal la palabra 'program'", datos[0].linea, datos[0].columna);
+        if (datos[2].dato != ";") throw CompilatorError("Falta ';' en declaración de program", datos[2].linea, datos[2].columna);
+        if (Check::isReserved(datos[1].dato)) throw CompilatorError("declaración de Program tiene una palabra reservada", datos[1].linea, datos[1].columna);
+        reserved.push_back(datos[1].dato);
 
         int initialNumber = 3;
         
-        if (datos[initialNumber] == identifiers[2]) {
+        if (datos[initialNumber].dato == identifiers[2]) {
             getSyntaxprocedure(datos, symbols, initialNumber);
         }
         
-        if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
+        if (datos[initialNumber].dato == identifiers[0] || (datos[initialNumber].dato != identifiers[3] && datos[initialNumber].dato != identifiers[4])) {
             initialNumber++;
-            while(datos[initialNumber] != identifiers[4]){
+            while(datos[initialNumber].dato != identifiers[4]){
                 getSyntaxVar(datos, symbols, initialNumber);
             }
         }
     
-        if (datos[initialNumber] == identifiers[4]) {
+        if (datos[initialNumber].dato == identifiers[4]) {
             initialNumber++;
             getSyntaxBegin(datos, symbols, initialNumber, true, false);
         }
-    } catch (const invalid_argument& e){
-        cerr<<"Error: "<< e.what()<<endl;
-        exit(1);
+    } catch (const CompilatorError& e){
+        cerr<< e.what()<<endl;
     }
 };
 
-int Syntax::getFinalNumber(int finalNumber, vector<string> &datos){
-    while (finalNumber < datos.size() && datos[finalNumber + 1] != ";") {
+int Syntax::getFinalNumber(int finalNumber, vector<Datos> &datos){
+    while (finalNumber < datos.size() && datos[finalNumber + 1].dato != ";") {
         finalNumber++;
     }
     return finalNumber;
 }
 
-void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure) {
+void Syntax::getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure) {
     bool final = true;
 
     if (isProcedure) {
-        if (datos[initialNumber] == identifiers[0] || (datos[initialNumber] != identifiers[3] && datos[initialNumber] != identifiers[4])) {
+        if (datos[initialNumber].dato == identifiers[0] || (datos[initialNumber].dato != identifiers[3] && datos[initialNumber].dato != identifiers[4])) {
             initialNumber++;
-            while(datos[initialNumber] != identifiers[4]){
+            while(datos[initialNumber].dato != identifiers[4]){
                 getSyntaxVar(datos, symbols, initialNumber);
             }
         }
@@ -56,13 +56,13 @@ void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int 
     }
     
     while (final) {
-        if (datos[initialNumber] == "end") { 
+        if (datos[initialNumber].dato == "end") { 
             if (initialNumber + 1 < datos.size()) {
-                if (datos[initialNumber + 1] == ".") {
+                if (datos[initialNumber + 1].dato == ".") {
                     cout << endl << "Codigo terminado";
                     return;
-                } else if (datos[initialNumber + 1] != ";") {
-                    throw invalid_argument("Begin-End mal declarado");
+                } else if (datos[initialNumber + 1].dato != ";") {
+                    throw CompilatorError("Begin-End mal declarado", datos[initialNumber+1].linea, datos[initialNumber+1].columna);
                 } else {
                     cout << "Begin-End terminado" << endl;
                     initialNumber++;
@@ -71,37 +71,37 @@ void Syntax::getSyntaxBegin(vector<string> &datos, vector<string> &symbols, int 
                 }
             }
         }
-        else if (datos[initialNumber] == "begin") {
+        else if (datos[initialNumber].dato == "begin") {
             initialNumber++;
             getSyntaxBegin(datos, symbols, initialNumber, false, false);
         }
-        else if (datos[initialNumber] == "if") {
+        else if (datos[initialNumber].dato == "if") {
             //cout << "Analizando el if" << endl;
             int result = ifAnalizer(datos, initialNumber);
             if (result == -1) return; 
             initialNumber = result;
         }
-        else if (datos[initialNumber] == "for") {
+        else if (datos[initialNumber].dato == "for") {
             //cout << "Analizando el for" << endl;
             int result = forAnalizer(datos, initialNumber);
             if (result == -1) return; 
             initialNumber = result;
-        }else if (datos[initialNumber] == ";") initialNumber++;
-        else if (Check::isVariable(datos[initialNumber])) getSyntaxAsignation(datos, symbols, initialNumber);
-        else if (datos[initialNumber]=="writeln") getSyntaxwriteln(datos, symbols, initialNumber);
-        else if (datos[initialNumber]=="readln") getSyntaxreadln(datos, symbols, initialNumber);
+        }else if (datos[initialNumber].dato == ";") initialNumber++;
+        else if (Check::isVariable(datos[initialNumber].dato)) getSyntaxAsignation(datos, symbols, initialNumber);
+        else if (datos[initialNumber].dato=="writeln") getSyntaxwriteln(datos, symbols, initialNumber);
+        else if (datos[initialNumber].dato=="readln") getSyntaxreadln(datos, symbols, initialNumber);
         else {
-            throw invalid_argument("Simbolo no reconocido");
+            throw CompilatorError("Simbolo no reconocido", datos[initialNumber].linea, datos[initialNumber].columna);
         }
     }
 }
 
-void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &initial) {
+void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &initial) {
     int final = getFinalNumber(initial, datos);
     Tree<string> arbolvar;
 
     // Avanzar si es un identificador válido
-    if (datos[initial] == identifiers[0]) {
+    if (datos[initial].dato == identifiers[0]) {
         initial++;
     }
 
@@ -116,7 +116,7 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &i
     // Verificar si 'a' contiene un valor válido
     if (!a->getValue().empty()) {
         if (std::any_of(variables.begin(), variables.end(), [&](const Variables &var) { return var.name == a->getValue(); })) {
-            throw invalid_argument("VARIABLE DOBLEMENTE DECLARADA.");
+            throw CompilatorError("VARIABLE DOBLEMENTE DECLARADA.", datos[initial].linea, datos[initial].columna);
         }
         newVariable.name = a->getValue();
         variables.push_back(newVariable);
@@ -124,19 +124,19 @@ void Syntax::getSyntaxVar(vector<string> &datos, vector<string> &symbols, int &i
 
     // Validar si el valor en 'b' es un tipo de dato válido
     if (std::none_of(dataType.begin(), dataType.end(), [&](const string &type) { return b->getValue() == type; })) {
-        throw invalid_argument("EN LA DECLARACION DEL DATATYPE VARIABLE.");
+        throw CompilatorError("EN LA DECLARACION DEL DATATYPE VARIABLE.", datos[initial].linea, datos[initial].columna);
     }
 
     // Validar variables y palabras reservadas en el árbol
     while (a->getRight() != nullptr) {
         if (isReservedOrInvalid(a->getLeft()->getValue()) || isReservedOrInvalid(a->getRight()->getValue())) {
-            throw invalid_argument("ARBOL HAY UNA PALABRA RESERVADA");
+            throw CompilatorError("ARBOL HAY UNA PALABRA RESERVADA", datos[initial].linea, datos[initial].columna);
         }
 
         if (std::any_of(variables.begin(), variables.end(), [&](const Variables &var) {
                 return var.name == a->getLeft()->getValue() || var.name == a->getRight()->getValue();
             })) {
-            throw invalid_argument("VARIABLE YA DECLARADA.");
+            throw CompilatorError("VARIABLE YA DECLARADA.", datos[initial].linea, datos[initial].columna);
         }
 
         newVariable.name = a->getLeft()->getValue();
@@ -219,7 +219,7 @@ string Syntax::phraseAnalizer(Node<string> *nodo){
     }
 }
 
-void Syntax::getSyntaxAsignation(vector<string> &datos, vector<string> &symbols, int &initial) {
+void Syntax::getSyntaxAsignation(vector<Datos> &datos, vector<string> &symbols, int &initial) {
     int final = getFinalNumber(initial, datos);
     Tree<string> arbolvar;
     
@@ -232,9 +232,9 @@ void Syntax::getSyntaxAsignation(vector<string> &datos, vector<string> &symbols,
     Node<string> *a = arbolvar.getRaiz()->getRight();
     Node<string> *b = arbolvar.getRaiz()->getLeft();
 
-    if(!Check::isVariable(b->getValue())) throw invalid_argument("ERROR: NO PUSISTE UNA FOKIN VARIABLE");
+    if(!Check::isVariable(b->getValue())) throw CompilatorError("NO PUSISTE UNA  VARIABLE", datos[initial].linea, datos[initial+2].columna);
     
-    if (!Check::verifyAsignation(arbolvar.getRaiz())) throw invalid_argument("NO PUSISTE BIEN LA ASIGNACION DE VARIABLE");
+    if (!Check::verifyAsignation(arbolvar.getRaiz())) throw CompilatorError("NO PUSISTE BIEN LA ASIGNACION DE VARIABLE", datos[initial+2].linea, datos[initial+2].columna);
 
     initial = final+2;
     string value = (string) phraseAnalizer(arbolvar.getRaiz()->getRight());
@@ -247,39 +247,39 @@ void Syntax::getSyntaxAsignation(vector<string> &datos, vector<string> &symbols,
     return;
 }
 
-int Syntax::forAnalizer(vector<string>& datos, int &i) {
+int Syntax::forAnalizer(vector<Datos>& datos, int &i) {
     //size_t i = 0;
 
     // 1.- Check for "for"
-    if (i >= datos.size() || datos[i] != "for") {
-        throw invalid_argument("Hay un error en el bucle for (no hay for)");
+    if (i >= datos.size() || datos[i].dato != "for") {
+        throw CompilatorError("Hay un error en el bucle for (no hay for)", datos[i].linea, datos[i].columna);
     }    
     i++;
 
     // 2.- Check for identifier
-    if (!Check::isIdentifier(datos[i])) {
-        throw invalid_argument("Hay un error en el bucle for (no hay identificador)");
+    if (!Check::isIdentifier(datos[i].dato)) {
+        throw CompilatorError("Hay un error en el bucle for (no hay identificador)", datos[i].linea, datos[i].columna);
     }
     i++;
         
     // 3.- Check for assignment operator ":="
-    if (i+1 >= datos.size() || datos[i] != ":=") throw invalid_argument("Hay un error en el bucle for (no hay :=)");
+    if (i+1 >= datos.size() || datos[i].dato != ":=") throw CompilatorError("Hay un error en el bucle for (no hay :=)", datos[i].linea, datos[i].columna);
     i++;
     
     // 4.- Check for initial value (number)
-    if (!Check::isNumber(datos[i])) throw invalid_argument("Hay un error en el bucle for (valor inicial no es un numero): "+datos[i]);
+    if (!Check::isNumber(datos[i].dato)) throw CompilatorError("Hay un error en el bucle for (valor inicial no es un numero)", datos[i].linea, datos[i].columna);
     i++;
     
     // 5.- Check for "to" or "downto"
-    if (i >= datos.size() || (datos[i] != "to" && datos[i] != "downto")) throw invalid_argument("Hay un error en el bucle for (no hay downto/to)");
+    if (i >= datos.size() || (datos[i].dato != "to" && datos[i].dato != "downto")) throw CompilatorError("Hay un error en el bucle for (no hay downto/to)", datos[i].linea, datos[i].columna);
     i++;
 
     // 6.- Check for final value (number)
-    if (!Check::isNumber(datos[i])) throw invalid_argument("Hay un error en el bucle for (valor final no es un numero)");
+    if (!Check::isNumber(datos[i].dato)) throw CompilatorError("Hay un error en el bucle for (valor final no es un numero)", datos[i].linea, datos[i].columna);
     i++;
     
     // 7.- Check for "do"
-    if (i >= datos.size() || datos[i] != "do") throw invalid_argument("Hay un error en el bucle for (no hay do)");
+    if (i >= datos.size() || datos[i].dato != "do") throw CompilatorError("Hay un error en el bucle for (no hay do)", datos[i].linea, datos[i].columna);
     i++;
     
     
@@ -289,41 +289,41 @@ int Syntax::forAnalizer(vector<string>& datos, int &i) {
     return i;
 }
 
-int Syntax::ifAnalizer(vector<string>& datos, int &i) {
+int Syntax::ifAnalizer(vector<Datos>& datos, int &i) {
     //size_t i = 0;
 
-    if (i >= datos.size() || datos[i] != "if") throw invalid_argument("Hay un error en el if (no hay if)");
+    if (i >= datos.size() || datos[i].dato != "if") throw CompilatorError("Hay un error en el if (no hay if)", datos[i].linea, datos[i].columna);
     i++;
-    if (datos[i] == "(") {
+    if (datos[i].dato == "(") {
         i++;
     }
 
-    while (i < datos.size() && datos[i] != ")" && datos[i] != "then") {
-        if (!Check::isIdentifier(datos[i]) &&
-            !isOperator(datos[i]) &&
-            !Check::isNumber(datos[i])) throw invalid_argument("la condicion dentro del if esta mal");
+    while (i < datos.size() && datos[i].dato != ")" && datos[i].dato != "then") {
+        if (!Check::isIdentifier(datos[i].dato) &&
+            !isOperator(datos[i].dato) &&
+            !Check::isNumber(datos[i].dato)) throw CompilatorError("la condicion dentro del if esta mal", datos[i].linea, datos[i].columna);
             i++;
     }
-    if (i >= datos.size() || datos[i] == ")") {
+    if (i >= datos.size() || datos[i].dato == ")") {
         i++;
     }
 
     // 3.- Check for "then"
-    if (i >= datos.size() || datos[i] != "then") throw invalid_argument("Hay un error en el if (no hay then)");
+    if (i >= datos.size() || datos[i].dato != "then") throw CompilatorError("Hay un error en el if (no hay then)", datos[i].linea, datos[i].columna);
     i++;
 
-    if (i < datos.size() && datos[i] != ";") {
-        if (datos[i] == "begin") {
+    if (i < datos.size() && datos[i].dato != ";") {
+        if (datos[i].dato == "begin") {
             i++;
             getSyntaxBegin(datos, symbols, i, false, false);
             
-        } else if (datos[i] == "if"){
+        } else if (datos[i].dato == "if"){
             int result = ifAnalizer(datos, i);
             if (result == -1) return -1;
             i = result;
         } else {
             for(const Variables var : variables) {
-                if (datos[i] == var.name) {
+                if (datos[i].dato == var.name) {
                     getSyntaxAsignation(datos, symbols, i);
                     break;
                 }
@@ -339,23 +339,23 @@ int Syntax::ifAnalizer(vector<string>& datos, int &i) {
     return i;
 }
 
-void Syntax::recursiveTree(Tree<string>&padre, vector<string> &datos, int initialNumber, int finalNumber){
+void Syntax::recursiveTree(Tree<string>&padre, vector<Datos> &datos, int initialNumber, int finalNumber){
     recursiveTree(padre.getRaiz(), padre, symbols, datos, initialNumber, finalNumber);
     return;
 }
 
-void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<string> &datos, int initialNumber, int finalNumber){
+void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<Datos> &datos, int initialNumber, int finalNumber){
     // detectar separador
     int symbol, j, lastParentesis;
     if (actual==NULL) return;
-    if (initialNumber+1 == finalNumber) throw invalid_argument("Asignacion mal colocada");
-    if (datos[initialNumber]=="("){
+    if (initialNumber+1 == finalNumber) throw CompilatorError("Asignacion mal colocada", datos[initialNumber].linea, datos[initialNumber].columna);
+    if (datos[initialNumber].dato=="("){
         lastParentesis= Check::getLastParentesis(initialNumber, datos);
         if (lastParentesis ==finalNumber){
-            padre.insertarOrdenado(datos[initialNumber],0,actual);
-            padre.insertarOrdenado(datos[lastParentesis],2,actual);
-            if(finalNumber-initialNumber== 1) throw invalid_argument("NADA ENTRE LOS PARENTESIS");
-            else if(finalNumber-initialNumber== 2) padre.insertarOrdenado(datos[finalNumber-1],1,actual);
+            padre.insertarOrdenado(datos[initialNumber].dato,0,actual);
+            padre.insertarOrdenado(datos[lastParentesis].dato,2,actual);
+            if(finalNumber-initialNumber== 1) throw CompilatorError("NADA ENTRE LOS PARENTESIS", datos[initialNumber].linea, datos[initialNumber].columna);
+            else if(finalNumber-initialNumber== 2) padre.insertarOrdenado(datos[finalNumber-1].dato,1,actual);
             else if(finalNumber-initialNumber> 2) {
                 padre.insertarOrdenado("", 1, actual);
                 recursiveTree(actual->getCenter(), padre, symbols, datos, initialNumber+1, finalNumber-1);
@@ -367,21 +367,21 @@ void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<stri
     else j=initialNumber;
     for(int i = 0; i< symbols.size(); i++){
         for(int k = j; k<=finalNumber;k++){
-            if (symbols[i]==datos[k]){
-                padre.insertarOrdenado(datos[k], 1, actual);
+            if (symbols[i]==datos[k].dato){
+                padre.insertarOrdenado(datos[k].dato, 1, actual);
                 symbol=k;
                 k= finalNumber+1;
                 i = symbols.size() +1;
             }
         }
     }
-        if (symbol==initialNumber+1) padre.insertarOrdenado(datos[symbol-1], 0, actual);
+        if (symbol==initialNumber+1) padre.insertarOrdenado(datos[symbol-1].dato, 0, actual);
         else {
             padre.insertarOrdenado("", 0, actual);
             recursiveTree(actual->getLeft(), padre, symbols, datos, initialNumber, symbol-1);
         }
     
-        if (symbol==finalNumber-1) padre.insertarOrdenado(datos[symbol+1], 2, actual);
+        if (symbol==finalNumber-1) padre.insertarOrdenado(datos[symbol+1].dato, 2, actual);
         else {
             padre.insertarOrdenado("", 2, actual);
             recursiveTree(actual->getRight(), padre, symbols, datos, symbol+1, finalNumber);
@@ -389,93 +389,93 @@ void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<stri
     return;
 }
 
-string getString(vector<string> datos, int &initialNumber, int &finalNumber) {
+string getString(vector<Datos> datos, int &initialNumber, int &finalNumber) {
 
     string value = "";
 
-    if (datos[initialNumber] == "\"") {
-        value += datos[initialNumber];
+    if (datos[initialNumber].dato == "\"") {
+        value += datos[initialNumber].dato;
         initialNumber++;
 
-        while (initialNumber <= finalNumber && datos[initialNumber] != "\"") {
-            value += datos[initialNumber];
+        while (initialNumber <= finalNumber && datos[initialNumber].dato != "\"") {
+            value += datos[initialNumber].dato;
             initialNumber++;
-            if (datos[initialNumber] == "\"") {
+            if (datos[initialNumber].dato == "\"") {
                 finalNumber = initialNumber;
                 break;
             }
         }
 
-        if (initialNumber <= finalNumber && datos[initialNumber] == "\"") {
-            value += datos[initialNumber];
+        if (initialNumber <= finalNumber && datos[initialNumber].dato == "\"") {
+            value += datos[initialNumber].dato;
         } else {
-            throw invalid_argument("Falta una comilla de cierre.");
+            throw CompilatorError("Falta una comilla de cierre.", datos[initialNumber].linea, datos[initialNumber].columna);
         }
     } else {
-        throw invalid_argument("No se encontró una comilla inicial");
+        throw CompilatorError("No se encontró una comilla inicial", datos[initialNumber].linea, datos[initialNumber].columna);
     }
 
     return value;
 }
 
-void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, int &initial) {
+void Syntax::getSyntaxwriteln(vector<Datos> &datos, vector<string> &symbols, int &initial) {
     int final = getFinalNumber(initial, datos);
     initial++;
     vector<string> something;
 
-    if (datos[initial] == symbols[6]) {
-        something.push_back(datos[initial]);
+    if (datos[initial].dato == symbols[6]) {
+        something.push_back(datos[initial].dato);
         initial++;
     } else {
-        throw invalid_argument("ERROR: FALTA UN PARENTESIS IZQUIERDO.");
+        throw CompilatorError("ERROR: FALTA UN PARENTESIS IZQUIERDO.", datos[initial].linea, datos[initial].columna);
     }
-    if (datos[initial] == symbols[7]) {
-        throw invalid_argument("ERROR: NO HAY NADA EN EL WRITELN");
+    if (datos[initial].dato == symbols[7]) {
+        throw CompilatorError("ERROR: NO HAY NADA EN EL WRITELN", datos[initial].linea, datos[initial].columna);
     }
         
     while (initial != final) {
             
-        if (datos[initial] == "\"") {
+        if (datos[initial].dato == "\"") {
             string value = getString(datos, initial, final);
             initial = final;
-            if (datos[initial] == "\"") {
+            if (datos[initial].dato == "\"") {
                 initial++;
             }
             final = getFinalNumber(initial, datos);
             something.push_back(value);
-            if (datos[initial] == "\"") {
-                throw invalid_argument("NO PUEDEN EXISTIR 2 STRINGS PEGADOS.");
+            if (datos[initial].dato == "\"") {
+                throw CompilatorError("NO PUEDEN EXISTIR 2 STRINGS PEGADOS.", datos[initial].linea, datos[initial].columna);
             }
             continue;
         }
             
-        if (datos[initial] == symbols[2]) {
-            if ((datos[initial - 1] == symbols[6]) || (datos[initial + 1] == symbols[7])) {
-                throw invalid_argument("EL MAS DEBE TENER VARIABLES O STRINGS ENTRE ELLA");
-            } else if ((datos[initial + 1] == symbols[2]) || (datos[initial - 1] == symbols[2])) {
-                throw invalid_argument("NO PUEDE HABER MAS DE 2 + JUNTOS.");
+        if (datos[initial].dato == symbols[2]) {
+            if ((datos[initial - 1].dato == symbols[6]) || (datos[initial + 1].dato == symbols[7])) {
+                throw CompilatorError("EL MAS DEBE TENER VARIABLES O STRINGS ENTRE ELLA", datos[initial].linea, datos[initial].columna);
+            } else if ((datos[initial + 1].dato == symbols[2]) || (datos[initial - 1].dato == symbols[2])) {
+                throw CompilatorError("NO PUEDE HABER MAS DE 2 + JUNTOS.", datos[initial].linea, datos[initial].columna);
             }
-            something.push_back(datos[initial]);
+            something.push_back(datos[initial].dato);
             initial++;
             continue;
         }
             
-        if ((datos[initial] == symbols[7])) {
-            if (datos[initial+1]!= symbols[8]) {
-                throw invalid_argument("ERROR: FALTA UN ; .");
+        if ((datos[initial].dato == symbols[7])) {
+            if (datos[initial+1].dato != symbols[8]) {
+                throw CompilatorError("ERROR: FALTA UN ; .", datos[initial].linea, datos[initial].columna);
             }   
         }
         bool isVariable = false;
         for (const auto &variable : variables) {
-            if (datos[initial] == variable.name) {
-                something.push_back(datos[initial]);
+            if (datos[initial].dato == variable.name) {
+                something.push_back(datos[initial].dato);
                 isVariable = true;
                 initial++;
                 break;
             }
         }
         if (!isVariable) {
-            throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA.");
+            throw CompilatorError("LO INGRESADO NO ES VARIABLE O NO HAY NADA.", datos[initial].linea, datos[initial].columna);
         }
         
         if (initial == final) {
@@ -484,33 +484,33 @@ void Syntax::getSyntaxwriteln(vector<string> &datos, vector<string> &symbols, in
         initial++;
     }
         
-    if ((initial == final) && (datos[initial] == symbols[7])) {
-        something.push_back(datos[initial]);
+    if ((initial == final) && (datos[initial].dato == symbols[7])) {
+        something.push_back(datos[initial].dato);
     } else {
-        throw invalid_argument("Falta un parentesis derecho");
+        throw CompilatorError("Falta un parentesis derecho", datos[initial].linea, datos[initial].columna);
     }
 
     initial++;
 }
 
-void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int &initial) {
+void Syntax::getSyntaxreadln(vector<Datos> &datos, vector<string> &symbols, int &initial) {
     int final = getFinalNumber(initial, datos);
     initial++;
     vector<string> comforting;
 
     // Verificar paréntesis izquierdo
-    if (datos[initial] == symbols[6]) {
-        comforting.push_back(datos[initial]);
+    if (datos[initial].dato == symbols[6]) {
+        comforting.push_back(datos[initial].dato);
         initial++;
     } else {
-        throw invalid_argument("FALTA UN PARENTESIS IZQUIERDO.");
+        throw CompilatorError("FALTA UN PARENTESIS IZQUIERDO.", datos[initial].linea, datos[initial].columna);
     }
 
     // Verificar si el siguiente dato es una variable válida
     bool isVariable = false;
     for (const auto &variable : variables) {
-        if (datos[initial] == variable.name) {
-            comforting.push_back(datos[initial]);
+        if (datos[initial].dato == variable.name) {
+            comforting.push_back(datos[initial].dato);
             isVariable = true;
             initial++;
             break;
@@ -518,31 +518,31 @@ void Syntax::getSyntaxreadln(vector<string> &datos, vector<string> &symbols, int
     }
     
     // Verificar paréntesis derecho y si solo hay una variable
-    if ((initial == final) && (datos[initial] == symbols[7])) {
-        comforting.push_back(datos[initial]);
-    } else if (datos[initial] == symbols[8]) {
-        throw invalid_argument("FALTA DE PARENTESIS DERECHO");
-    } else if (datos[initial+1] != symbols[7]) {
-        throw invalid_argument("SOLO DEBE HABER UNA VARIABLE.");
+    if ((initial == final) && (datos[initial].dato == symbols[7])) {
+        comforting.push_back(datos[initial].dato);
+    } else if (datos[initial].dato== symbols[8]) {
+        throw CompilatorError("FALTA DE PARENTESIS DERECHO", datos[initial].linea, datos[initial].columna);
+    } else if (datos[initial+1].dato != symbols[7]) {
+        throw CompilatorError("SOLO DEBE HABER UNA VARIABLE.", datos[initial+1].linea, datos[initial+1].columna);
     }
     
     if (!isVariable) {
-        throw invalid_argument("LO INGRESADO NO ES VARIABLE O NO HAY NADA.");
+        throw CompilatorError("LO INGRESADO NO ES VARIABLE O NO HAY NADA.", datos[initial].linea, datos[initial].columna);
     }
     initial++;
     
 }
 
-void Syntax::getSyntaxprocedure(vector<string> &datos, vector<string> &symbols, int &initial) {
+void Syntax::getSyntaxprocedure(vector<Datos> &datos, vector<string> &symbols, int &initial) {
     int final = getFinalNumber(initial, datos);
-    if (datos[final] != ")")
+    if (datos[final].dato != ")")
     {
-        throw invalid_argument("Falta un parentesis derecho");
+        throw CompilatorError("Falta un parentesis derecho", datos[final].linea, datos[final].columna);
     }
 
-    if (datos[initial+1] != "(")
+    if (datos[initial+1].dato != "(")
     {
-        throw invalid_argument("Falta un parentesis derecho");
+        throw CompilatorError("Falta un parentesis derecho", datos[initial+1].linea, datos[initial+1].columna);
     }
     initial = final + 2;
     getSyntaxBegin(datos, symbols, initial, false, true);

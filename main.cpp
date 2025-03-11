@@ -16,7 +16,7 @@ int main() {
     buffer << pascal.rdbuf();
     string datos = buffer.str();
 
-    vector<string> tokens = tokenize(datos);
+    vector<Datos> tokens = tokenize(datos);
 
     Syntax sintactico;
     

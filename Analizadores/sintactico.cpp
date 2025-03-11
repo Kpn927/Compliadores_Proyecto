@@ -149,7 +149,7 @@ void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &in
             variables.push_back(newVariable);
         }
     }
-
+    arbolvar.~Tree();
     // Avanzar a la siguiente línea
     initial = final + 2;
 }
@@ -244,6 +244,7 @@ void Syntax::getSyntaxAsignation(vector<Datos> &datos, vector<string> &symbols, 
         i++;
     }
     cout<<"[resultado: "<<value<<"]"<<endl;
+    arbolvar.~Tree();
     return;
 }
 

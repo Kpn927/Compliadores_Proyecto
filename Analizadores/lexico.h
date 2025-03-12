@@ -31,7 +31,7 @@ struct Datos{
     int columna;
 };
 
-vector<string> reserved = {"if", "then", "to", "do", "downto", "writeln", "readln"};
+vector<string> reserved = {"if", "then", "to", "do", "downto", "writeln", "readln", "else"};
 vector<string> operators = {"+", "-", "*", "/", ":=", "=", ">", "<", ">=", "<=", "==", "!=", "++",":"};
 vector<string> dataType = {"integer", "real", "character", "array", "boolean", "double"};
 vector<string> identifiers = {"var", "const", "procedure", "function", "begin", "end", "program"};

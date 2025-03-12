@@ -17,6 +17,8 @@ begin
     begin
         if (y < 5) then
             z := 10;
+        else 
+            z := 20;
     end;
 
 for x := 0 to 150 do

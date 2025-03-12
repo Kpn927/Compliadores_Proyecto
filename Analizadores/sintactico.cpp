@@ -285,10 +285,6 @@ int Syntax::forAnalizer(vector<Datos>& datos, int &i) {
     if (i >= datos.size() || datos[i].dato != "do") throw CompilatorError("Hay un error en el bucle for (no hay do)", datos[i].linea, datos[i].columna);
     i++;
     
-    
-    // Return the index where the analysis ends
-    // cout << "Analysis of 'for' statement ended at index: " << i << endl;
-    // cout << "Last token analyzed: " << datos[i - 1] << endl;
     return i;
 }
 
@@ -324,21 +320,26 @@ int Syntax::ifAnalizer(vector<Datos>& datos, int &i) {
             int result = ifAnalizer(datos, i);
             if (result == -1) return -1;
             i = result;
-        } else {
-            for(const Variables var : variables) {
-                if (datos[i].dato == var.name) {
+            
+        } else if (Check::isVariable(datos[i].dato)) {
+                getSyntaxAsignation(datos, symbols, i);
+
+            if (i < datos.size() && datos[i].dato == "else") {
+                i++;
+
+                if (datos[i].dato == "if") {
+                    int result = ifAnalizer(datos, i);
+                    if (result == -1) return -1;
+                    i = result;
+                } else if (Check::isVariable(datos[i].dato)) {
                     getSyntaxAsignation(datos, symbols, i);
-                    break;
+                } else {
+                    throw CompilatorError("Declaracion invalida despues de else", datos[i].linea, datos[i].columna);
                 }
             }
-            // int final = getFinalNumber(i, datos);
-            // i = final + 1;
         } 
         
     }
-
-     //cout << "Analysis of 'if' statement ended at index: " << i << endl;
-     //cout << "Last token analyzed: " << datos[i - 1] << endl;
     return i;
 }
 

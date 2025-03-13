@@ -1,10 +1,11 @@
 program Hola;
 
-procedure();
+function weboscalientes(n,y,z,o:integer, x:double): integer;
 var
-    x:integer;
+  w, result: integer;
 begin
-    writeln("");
+  writeln(x);
+  weboscalientes;
 end;
 
 var 

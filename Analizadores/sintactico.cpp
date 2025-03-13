@@ -14,6 +14,10 @@ void Syntax::getSyntax(vector<Datos> &datos) {
 
         int initialNumber = 3;
         
+        if (datos[initialNumber].dato == identifiers[3]) {
+            getSyntaxfunction(datos, symbols, initialNumber);
+        }
+        
         if (datos[initialNumber].dato == identifiers[2]) {
             getSyntaxprocedure(datos, symbols, initialNumber);
         }
@@ -21,13 +25,14 @@ void Syntax::getSyntax(vector<Datos> &datos) {
         if (datos[initialNumber].dato == identifiers[0] || (datos[initialNumber].dato != identifiers[3] && datos[initialNumber].dato != identifiers[4])) {
             initialNumber++;
             while(datos[initialNumber].dato != identifiers[4]){
-                getSyntaxVar(datos, symbols, initialNumber);
+                getSyntaxVar(datos, symbols, initialNumber, false);
             }
         }
     
         if (datos[initialNumber].dato == identifiers[4]) {
             initialNumber++;
-            getSyntaxBegin(datos, symbols, initialNumber, true, false);
+            bool flag_function = false;
+            getSyntaxBegin(datos, symbols, initialNumber, true, false, flag_function, "");
         }
     } catch (const CompilatorError& e){
         cerr<< e.what()<<endl;
@@ -41,14 +46,24 @@ int Syntax::getFinalNumber(int finalNumber, vector<Datos> &datos){
     return finalNumber;
 }
 
-void Syntax::getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure) {
+void Syntax::getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure, bool &isFunction, string functionName) {
     bool final = true;
+
+    if (isFunction) {
+        if (datos[initialNumber].dato == identifiers[0] || (datos[initialNumber].dato != identifiers[3] && datos[initialNumber].dato != identifiers[4])) {
+            initialNumber++;
+            while(datos[initialNumber].dato != identifiers[4]){
+                getSyntaxVar(datos, symbols, initialNumber, false);
+            }
+        }
+        initialNumber++;
+    }
 
     if (isProcedure) {
         if (datos[initialNumber].dato == identifiers[0] || (datos[initialNumber].dato != identifiers[3] && datos[initialNumber].dato != identifiers[4])) {
             initialNumber++;
             while(datos[initialNumber].dato != identifiers[4]){
-                getSyntaxVar(datos, symbols, initialNumber);
+                getSyntaxVar(datos, symbols, initialNumber, false);
             }
         }
         initialNumber++;
@@ -64,7 +79,7 @@ void Syntax::getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &
                 } else if (datos[initialNumber + 1].dato != ";") {
                     throw CompilatorError("Begin-End mal declarado", datos[initialNumber+1].linea, datos[initialNumber+1].columna);
                 } else {
-                    cout << "Begin-End terminado" << endl;
+                    // cout << "Begin-End terminado" << endl;
                     initialNumber++;
                     final = false;
                     if (!isPrincipal) return;
@@ -73,7 +88,8 @@ void Syntax::getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &
         }
         else if (datos[initialNumber].dato == "begin") {
             initialNumber++;
-            getSyntaxBegin(datos, symbols, initialNumber, false, false);
+            bool flag_function = false;
+            getSyntaxBegin(datos, symbols, initialNumber, false, false, flag_function, "");
         }
         else if (datos[initialNumber].dato == "if") {
             //cout << "Analizando el if" << endl;
@@ -90,13 +106,14 @@ void Syntax::getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &
         else if (Check::isVariable(datos[initialNumber].dato)) getSyntaxAsignation(datos, symbols, initialNumber);
         else if (datos[initialNumber].dato=="writeln") getSyntaxwriteln(datos, symbols, initialNumber);
         else if (datos[initialNumber].dato=="readln") getSyntaxreadln(datos, symbols, initialNumber);
-        else {
+        else if (datos[initialNumber].dato==functionName) {isFunction = false; initialNumber++;
+        } else {
             throw CompilatorError("Simbolo no reconocido", datos[initialNumber].linea, datos[initialNumber].columna);
         }
     }
 }
 
-void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &initial) {
+void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &initial, bool isFunction) {
     int final = getFinalNumber(initial, datos);
     Tree<string> arbolvar;
 
@@ -104,6 +121,18 @@ void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &in
     if (datos[initial].dato == identifiers[0]) {
         initial++;
     }
+
+    if (isFunction)
+    {
+        for (int i = initial; i < final; i++)
+        {
+            if (Check::isDatatype(datos[i].dato))
+            {
+                final = i;
+            }
+        }
+    }
+    
 
     arbolvar.insertarOrdenado("", 0);
 
@@ -115,15 +144,17 @@ void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &in
 
     // Verificar si 'a' contiene un valor válido
     if (!a->getValue().empty()) {
-        if (std::any_of(variables.begin(), variables.end(), [&](const Variables &var) { return var.name == a->getValue(); })) {
+        if (Check::isVariable(a->getValue())) {
             throw CompilatorError("VARIABLE DOBLEMENTE DECLARADA.", datos[initial].linea, datos[initial].columna);
         }
+        
         newVariable.name = a->getValue();
         variables.push_back(newVariable);
     }
+    
 
     // Validar si el valor en 'b' es un tipo de dato válido
-    if (std::none_of(dataType.begin(), dataType.end(), [&](const string &type) { return b->getValue() == type; })) {
+    if (!Check::isDatatype(b->getValue())) {
         throw CompilatorError("EN LA DECLARACION DEL DATATYPE VARIABLE.", datos[initial].linea, datos[initial].columna);
     }
 
@@ -133,11 +164,10 @@ void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &in
             throw CompilatorError("ARBOL HAY UNA PALABRA RESERVADA", datos[initial].linea, datos[initial].columna);
         }
 
-        if (std::any_of(variables.begin(), variables.end(), [&](const Variables &var) {
-                return var.name == a->getLeft()->getValue() || var.name == a->getRight()->getValue();
-            })) {
+        if (Check::isVariable(a->getLeft()->getValue()) || Check::isVariable(a->getRight()->getValue())) {
             throw CompilatorError("VARIABLE YA DECLARADA.", datos[initial].linea, datos[initial].columna);
         }
+        
 
         newVariable.name = a->getLeft()->getValue();
         variables.push_back(newVariable);
@@ -152,6 +182,7 @@ void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &in
     arbolvar.~Tree();
     // Avanzar a la siguiente línea
     initial = final + 2;
+    
 }
 
 bool Syntax::isReservedOrInvalid(const string &value) {
@@ -314,7 +345,8 @@ int Syntax::ifAnalizer(vector<Datos>& datos, int &i) {
     if (i < datos.size() && datos[i].dato != ";") {
         if (datos[i].dato == "begin") {
             i++;
-            getSyntaxBegin(datos, symbols, i, false, false);
+            bool flag_function = false;
+            getSyntaxBegin(datos, symbols, i, false, false, flag_function, "");
             
         } else if (datos[i].dato == "if"){
             int result = ifAnalizer(datos, i);
@@ -469,16 +501,8 @@ void Syntax::getSyntaxwriteln(vector<Datos> &datos, vector<string> &symbols, int
                 throw CompilatorError("ERROR: FALTA UN ; .", datos[initial].linea, datos[initial].columna);
             }   
         }
-        bool isVariable = false;
-        for (const auto &variable : variables) {
-            if (datos[initial].dato == variable.name) {
-                something.push_back(datos[initial].dato);
-                isVariable = true;
-                initial++;
-                break;
-            }
-        }
-        if (!isVariable) {
+        
+        if (!Check::isVariable(datos[initial].dato)) {
             throw CompilatorError("LO INGRESADO NO ES VARIABLE O NO HAY NADA.", datos[initial].linea, datos[initial].columna);
         }
         
@@ -509,17 +533,6 @@ void Syntax::getSyntaxreadln(vector<Datos> &datos, vector<string> &symbols, int 
     } else {
         throw CompilatorError("FALTA UN PARENTESIS IZQUIERDO.", datos[initial].linea, datos[initial].columna);
     }
-
-    // Verificar si el siguiente dato es una variable válida
-    bool isVariable = false;
-    for (const auto &variable : variables) {
-        if (datos[initial].dato == variable.name) {
-            comforting.push_back(datos[initial].dato);
-            isVariable = true;
-            initial++;
-            break;
-        }
-    }
     
     // Verificar paréntesis derecho y si solo hay una variable
     if ((initial == final) && (datos[initial].dato == symbols[7])) {
@@ -530,8 +543,8 @@ void Syntax::getSyntaxreadln(vector<Datos> &datos, vector<string> &symbols, int 
         throw CompilatorError("SOLO DEBE HABER UNA VARIABLE.", datos[initial+1].linea, datos[initial+1].columna);
     }
     
-    if (!isVariable) {
-        throw CompilatorError("LO INGRESADO NO ES VARIABLE O NO HAY NADA.", datos[initial].linea, datos[initial].columna);
+    if (!Check::isVariable(datos[initial].dato)) {
+        throw CompilatorError("lo ingresado no es variable o no hay nada.", datos[initial].linea, datos[initial].columna);
     }
     initial++;
     
@@ -541,15 +554,71 @@ void Syntax::getSyntaxprocedure(vector<Datos> &datos, vector<string> &symbols, i
     int final = getFinalNumber(initial, datos);
     if (datos[final].dato != ")")
     {
-        throw CompilatorError("Falta un parentesis derecho", datos[final].linea, datos[final].columna);
+        throw CompilatorError("falta un parentesis derecho", datos[final].linea, datos[final].columna);
     }
 
     if (datos[initial+1].dato != "(")
     {
-        throw CompilatorError("Falta un parentesis derecho", datos[initial+1].linea, datos[initial+1].columna);
+        throw CompilatorError("falta un parentesis derecho", datos[initial+1].linea, datos[initial+1].columna);
     }
     initial = final + 2;
-    getSyntaxBegin(datos, symbols, initial, false, true);
+    bool flag_function = false;
+    getSyntaxBegin(datos, symbols, initial, false, true, flag_function, "");
     variables.clear();
     initial++;
 }
+
+void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, int &initial) {
+    int final = getFinalNumber(initial, datos);
+    initial++;
+    string functionName = "";
+    if (datos[initial].dato == "(") {
+        throw CompilatorError("falta escribir el nombre de la funcion.", datos[final].linea, datos[final].columna);
+    }
+    initial++;
+    if (datos[initial].dato != "(") {
+        throw CompilatorError("falta el parentesis izquierdo.", datos[final].linea, datos[final].columna);
+    } else {
+        functionName = datos[initial-1].dato;
+    }
+    initial++;
+
+    Variables newVariable;
+    while (datos[initial].dato != ")") {
+        if (Check::isReserved(datos[initial].dato)) {
+            throw CompilatorError("palabra reservada o identificador en la declaracion de la funcion", datos[initial].linea, datos[initial].columna);
+        } else {
+            getSyntaxVar(datos, symbols, initial, true);
+        }
+        initial--;
+        if (datos[initial].dato == ",") {
+            initial++;
+            if (datos[initial].dato == ")") {
+                throw CompilatorError("falta un identificador", datos[initial].linea, datos[initial].columna);
+            }
+        } else if (datos[initial].dato == ")") {
+            initial++;
+            break;
+        } else {
+            throw CompilatorError("falta una coma o parentesis derecho", datos[initial].linea, datos[initial].columna);
+        }
+    }
+    if (datos[initial].dato != ":") {
+        throw CompilatorError("falta un : en la declaracion de la funcion", datos[initial].linea, datos[initial].columna);
+    }
+    initial++;
+    if (!Check::isDatatype(datos[initial].dato)){
+        throw CompilatorError("falta el datatype", datos[initial].linea, datos[initial].columna);
+    }
+    initial = final + 2;
+    bool function_error = true;
+    getSyntaxBegin(datos, symbols, initial, false, false, function_error, functionName);
+    if (function_error) {
+        throw CompilatorError("la funcion espera lo que va a devolver.", datos[initial].linea, datos[initial].columna);
+    }
+    
+    variables.clear();
+    initial++;
+}
+
+

@@ -21,7 +21,7 @@ class Syntax{
     int ifAnalizer(vector<Datos>& datos, int &i);
     
     // Método para sintaxis de Begin-End
-    void getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure);
+    void getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure, bool &isFunction, string functionName);
 
     // Método para crear los árboles
     void recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<Datos> &datos, int initialNumber, int finalNumber);
@@ -30,7 +30,7 @@ class Syntax{
     void recursiveTree(Tree<string>&padre, vector<Datos> &datos, int initialNumber, int finalNumber);
 
     //Sintaxis de Var en Pascal
-    void getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &initial);
+    void getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &initial, bool isFunction);
 
     //sintaxis de Asignaciones x:=1;
     void getSyntaxAsignation(vector<Datos> &datos, vector<string> &symbols, int &initial);
@@ -43,6 +43,9 @@ class Syntax{
 
     // Analizador del readln
     void getSyntaxreadln(vector<Datos> &datos, vector<string> &symbols, int &initial);
+
+    // Analizador de funciones
+    void getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, int &initial);
 
     string phraseAnalizer(Node<string> *nodo);
 

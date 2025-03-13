@@ -22,6 +22,8 @@ class Check{
 
     static bool isVariable(string word);
 
+    static bool isDatatype(string word);
+
     static int getLastParentesis (int initial, vector<Datos> datos);
 };
 
@@ -139,6 +141,13 @@ bool Check::isReserved(string word){
 bool Check::isVariable(string word){
     for (const Variables& variable : variables) {
         if (variable.name == word) return true;
+    }
+    return false;
+}
+
+bool Check::isDatatype(string word){
+    for (const string& type : dataType) {
+        if (word == type) return true;
     }
     return false;
 }

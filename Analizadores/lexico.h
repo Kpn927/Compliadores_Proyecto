@@ -23,6 +23,7 @@ enum class Tokens {
 struct Variables{
     string name;
     string value;
+    string type;
 };
 
 struct Datos{

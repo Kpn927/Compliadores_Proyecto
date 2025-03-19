@@ -149,6 +149,7 @@ void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &in
         }
         
         newVariable.name = a->getValue();
+        newVariable.type = b->getValue();
         variables.push_back(newVariable);
     }
     
@@ -170,12 +171,15 @@ void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &in
         
 
         newVariable.name = a->getLeft()->getValue();
+        newVariable.type = b->getValue();
         variables.push_back(newVariable);
 
         a = a->getRight();
 
         if (!a->getValue().empty()) {
             newVariable.name = a->getValue();
+            newVariable.type = b->getValue();
+
             variables.push_back(newVariable);
         }
     }

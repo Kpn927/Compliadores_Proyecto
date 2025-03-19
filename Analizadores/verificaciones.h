@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "lexico.h"
+#include "error.h"
 using namespace std;
 class Check{
     public:
@@ -16,7 +17,7 @@ class Check{
 
     static bool matchOperator(const vector<string>& datos, size_t& i, const vector<string>& op);
 
-    static bool verifyAsignation(Node<string>* actual);
+    static bool verifyAsignation(Node<string>* actual, string type, int line, int column);
 
     static bool isReserved(string word);
 
@@ -25,6 +26,10 @@ class Check{
     static bool isDatatype(string word);
 
     static int getLastParentesis (int initial, vector<Datos> datos);
+
+    static string getType(string variable);
+
+    static int getLastQuotes(int initial, vector<Datos> datos);
 };
 
 int Check::getLastParentesis(int initial, vector<Datos> datos){
@@ -38,27 +43,61 @@ int Check::getLastParentesis(int initial, vector<Datos> datos){
     return initial;
 }
 
+int Check::getLastQuotes(int initial, vector<Datos> datos){
+    initial++;
+    while (datos[initial].dato != "'"){
+        initial++;
+    }
+    return initial;
+}
+
 bool Check::isIdentifier(const string& datos) {
     return (!datos.empty() && isalpha(datos[0]));
 }
 
-bool Check::verifyAsignation(Node<string>* actual){
+bool Check::verifyAsignation(Node<string>* actual, string type, int line, int column){
     bool right = false, left = false, center;
     if((actual->getCenter()->getValue() == "")){
-        center = Check::verifyAsignation(actual->getCenter());
+        center = Check::verifyAsignation(actual->getCenter(), type, line, column);
         return center;
-    }else if (Check::isNumber(actual->getCenter()->getValue())) return true;
-    if((actual->getLeft()->getValue() == "")) left = Check::verifyAsignation(actual->getLeft());
-    else if(Check::isNumber(actual->getLeft()->getValue())) left = true;
-    if((actual->getRight()->getValue() == "")) right = Check::verifyAsignation(actual->getRight());
-    else if(Check::isNumber(actual->getRight()->getValue())) right = true;
+    }else if (Check::isNumber(actual->getCenter()->getValue())){
+        if (!(type == "integer" || type == "double" || type == "real")) throw CompilatorError("Asignación incluye error de tipos", line, column);
+        return true;
+    }
+    if((actual->getLeft()->getValue() == "")) left = Check::verifyAsignation(actual->getLeft(), type, line, column);
+    else if(Check::isNumber(actual->getLeft()->getValue())){
+        if (!(type == "integer" || type == "double" || type == "real")) throw CompilatorError("Asignación incluye error de tipos", line, column);
+        left = true;
+    }
+    if((actual->getRight()->getValue() == "")) right = Check::verifyAsignation(actual->getRight(), type, line, column);
+    else if(Check::isNumber(actual->getRight()->getValue())){
+        if (!(type == "integer" || type == "double" || type == "real")) throw CompilatorError("Asignación incluye error de tipos", line, column);
+        right = true;
+    }
     for (int i = 0; i < variables.size(); i++){
-        if (left == false && variables[i].name == actual->getLeft()->getValue()) left = true;
-        if (variables[i].name == actual->getCenter()->getValue()) return true;
-        if (right == false && variables[i].name == actual->getRight()->getValue()) right = true;     
+        if (left == false && variables[i].name == actual->getLeft()->getValue()){
+            if (variables[i].type != type) throw CompilatorError("Asignación incluye error de tipos", line, column);
+            left = true;
+        }
+        if (variables[i].name == actual->getCenter()->getValue()){
+            if (variables[i].type != type) throw CompilatorError("Asignación incluye error de tipos", line, column);
+            return true;
+        }
+        if (right == false && variables[i].name == actual->getRight()->getValue()){
+            if (variables[i].type != type) throw CompilatorError("Asignación incluye error de tipos", line, column);
+            right = true;     
+        }
     }
     if (left==true && right==true) return true;
     return false;
+}
+
+string Check::getType(string variable){
+    for (const Variables var: variables){
+        if (var.name == variable) return var.type;
+    }
+    cout<<"ERROR EN GET TYPE";
+    return "";
 }
 
 bool Check::isNumber(const vector<string>& datos, size_t& i) {

@@ -74,6 +74,13 @@ void Syntax::getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &
             if (initialNumber + 1 < datos.size()) {
                 if (datos[initialNumber + 1].dato == ".") {
                     cout << endl << "Codigo terminado";
+
+                    for (const Variables& var : variables) {
+                        if (var.value.empty()) {
+                            cout << endl << "WARNING: Variable '" << var.name << "' no inicializada";
+                        }
+                    }
+                    
                     return;
                 } else if (datos[initialNumber + 1].dato != ";") {
                     throw CompilatorError("Begin-End mal declarado", datos[initialNumber+1].linea, datos[initialNumber+1].columna);
@@ -571,6 +578,12 @@ void Syntax::getSyntaxprocedure(vector<Datos> &datos, vector<string> &symbols, i
     initial = final + 2;
     bool flag_function = false;
     getSyntaxBegin(datos, symbols, initial, false, true, flag_function, "");
+
+    for (const Variables& var : variables) {
+        if (var.value.empty()) {
+            cout << endl << "WARNING: Variable '" << var.name << "' no inicializada";
+        }
+    }
     variables.clear();
     initial++;
 }
@@ -623,6 +636,15 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
     if (function_error) {
         throw CompilatorError("la funcion espera lo que va a devolver.", datos[initial].linea, datos[initial].columna);
     }
+
+
+    // Paso un error random
+    for (const Variables& var : variables) {
+        if (var.value.empty()) {
+            cout << endl << "WARNING: Variable '" << var.name << "' no inicializada";
+        }
+    }
+
     
     variables.clear();
     initial++;

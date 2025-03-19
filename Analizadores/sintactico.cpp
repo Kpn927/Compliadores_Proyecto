@@ -1,6 +1,5 @@
 #include "sintactico.h"
 #include "verificaciones.h"
-#include "error.h"
 Syntax::Syntax() {}
 
 void Syntax::getSyntax(vector<Datos> &datos) {
@@ -270,11 +269,14 @@ void Syntax::getSyntaxAsignation(vector<Datos> &datos, vector<string> &symbols, 
     Node<string> *b = arbolvar.getRaiz()->getLeft();
 
     if(!Check::isVariable(b->getValue())) throw CompilatorError("NO PUSISTE UNA  VARIABLE", datos[initial].linea, datos[initial+2].columna);
-    
-    if (!Check::verifyAsignation(arbolvar.getRaiz())) throw CompilatorError("NO PUSISTE BIEN LA ASIGNACION DE VARIABLE", datos[initial+2].linea, datos[initial+2].columna);
+    string type = Check::getType(b->getValue());
+
+    if (!Check::verifyAsignation(arbolvar.getRaiz(), type, datos[initial+2].linea, datos[initial+2].columna) && type != "character") throw CompilatorError("NO PUSISTE BIEN LA ASIGNACION DE VARIABLE", datos[initial+2].linea, datos[initial+2].columna);
 
     initial = final+2;
-    string value = (string) phraseAnalizer(arbolvar.getRaiz()->getRight());
+    string value;
+    if (type == "character") value = datos[initial-3].dato;
+    else value = (string) phraseAnalizer(arbolvar.getRaiz()->getRight());
     int i = 0;
     while(i<variables.size()){
         if(arbolvar.getRaiz()->getLeft()->getValue() == variables[i].name) variables[i].value = value;
@@ -386,14 +388,15 @@ void Syntax::recursiveTree(Tree<string>&padre, vector<Datos> &datos, int initial
 
 void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<Datos> &datos, int initialNumber, int finalNumber){
     // detectar separador
-    int symbol, j, lastParentesis;
+    int symbol, j, lastWord;
     if (actual==NULL) return;
     if (initialNumber+1 == finalNumber) throw CompilatorError("Asignacion mal colocada", datos[initialNumber].linea, datos[initialNumber].columna);
-    if (datos[initialNumber].dato=="("){
-        lastParentesis= Check::getLastParentesis(initialNumber, datos);
-        if (lastParentesis ==finalNumber){
+    if (datos[initialNumber].dato=="(" || datos[initialNumber].dato == "'"){
+        if (datos[initialNumber].dato=="(") lastWord = Check::getLastParentesis(initialNumber, datos);
+        else lastWord = Check::getLastQuotes(initialNumber, datos);
+        if (lastWord ==finalNumber){
             padre.insertarOrdenado(datos[initialNumber].dato,0,actual);
-            padre.insertarOrdenado(datos[lastParentesis].dato,2,actual);
+            padre.insertarOrdenado(datos[lastWord].dato,2,actual);
             if(finalNumber-initialNumber== 1) throw CompilatorError("NADA ENTRE LOS PARENTESIS", datos[initialNumber].linea, datos[initialNumber].columna);
             else if(finalNumber-initialNumber== 2) padre.insertarOrdenado(datos[finalNumber-1].dato,1,actual);
             else if(finalNumber-initialNumber> 2) {
@@ -402,7 +405,7 @@ void Syntax::recursiveTree(Node<string>* actual, Tree<string>&padre, vector<stri
             }
             return;
         }
-        else j = lastParentesis;
+        else j = lastWord;
     }
     else j=initialNumber;
     for(int i = 0; i< symbols.size(); i++){

@@ -11,8 +11,9 @@ end;
 var 
     x,y,z,y1:integer;
     w:double;
+    test:character;
 begin
-
+    test := 'h';
      x := 0;
     if (x > 3) then
     begin

@@ -282,7 +282,10 @@ void Syntax::getSyntaxAsignation(vector<Datos> &datos, vector<string> &symbols, 
 
     initial = final+2;
     string value;
-    if (type == "character") value = datos[initial-3].dato;
+    if (type == "character"){
+        value = datos[initial-3].dato;
+        if (value.size() >1 || (datos[initial-2].dato != "'" && datos[initial-4].dato != "'")) throw CompilatorError("character tiene más de un valor", datos[initial-3].linea, datos[initial-3].columna);
+    }
     else value = (string) phraseAnalizer(arbolvar.getRaiz()->getRight());
     int i = 0;
     while(i<variables.size()){
@@ -578,12 +581,6 @@ void Syntax::getSyntaxprocedure(vector<Datos> &datos, vector<string> &symbols, i
     initial = final + 2;
     bool flag_function = false;
     getSyntaxBegin(datos, symbols, initial, false, true, flag_function, "");
-
-    for (const Variables& var : variables) {
-        if (var.value.empty()) {
-            cout << endl << "WARNING: Variable '" << var.name << "' no inicializada";
-        }
-    }
     variables.clear();
     initial++;
 }
@@ -635,14 +632,6 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
     getSyntaxBegin(datos, symbols, initial, false, false, function_error, functionName);
     if (function_error) {
         throw CompilatorError("la funcion espera lo que va a devolver.", datos[initial].linea, datos[initial].columna);
-    }
-
-
-    // Paso un error random
-    for (const Variables& var : variables) {
-        if (var.value.empty()) {
-            cout << endl << "WARNING: Variable '" << var.name << "' no inicializada";
-        }
     }
 
     

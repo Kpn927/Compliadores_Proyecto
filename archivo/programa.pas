@@ -1,12 +1,12 @@
 program Hola;
 
-function weboscalientes(n,y,z,o:integer, x:double): integer;
+function pruebas(n,y,z,o:integer, x:double): integer;
 var
   w, result: integer;
   T: double;
 begin
   writeln(x);
-  weboscalientes;
+  pruebas;
 end;
 
 var 

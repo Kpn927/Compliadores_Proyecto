@@ -12,10 +12,12 @@ end;
 var 
     x,y,z,y1:integer;
     w:double;
+    writeln:integer;
     test:character;
 begin
     test := 'h';
      x := 0;
+     else := 0;
     if (x > 3) then
     begin
         if (y < 5) then

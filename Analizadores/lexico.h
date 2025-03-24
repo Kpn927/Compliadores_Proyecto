@@ -32,11 +32,18 @@ struct Datos{
     int columna;
 };
 
+struct Function{
+    string name;
+    string type;
+    vector<Variables> variables;
+};
+
 vector<string> reserved = {"if", "then", "to", "do", "downto", "writeln", "readln", "else"};
 vector<string> operators = {"+", "-", "*", "/", ":=", "=", ">", "<", ">=", "<=", "==", "!=", "++",":"};
 vector<string> dataType = {"integer", "real", "character", "array", "boolean", "double"};
 vector<string> identifiers = {"var", "const", "procedure", "function", "begin", "end", "program"};
 vector<Variables> variables = {};
+vector<Function> functions = {};
 vector<string> delimiters = {"(", ")", ";",  ",", ".", "{", "}"};
 vector<string> symbols = {":=",":", "+", "-", "*", "/","(", ")", ";",  ",", ".", "{", "}", "=", ">", "<", ">=", "<=", "==", "!=", "++"};
 

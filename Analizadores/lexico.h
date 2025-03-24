@@ -35,7 +35,7 @@ struct Datos{
 struct Function{
     string name;
     string type;
-    vector<string> variables;
+    vector<Variables> variables;
 };
 
 vector<string> reserved = {"if", "then", "to", "do", "downto", "writeln", "readln", "else"};

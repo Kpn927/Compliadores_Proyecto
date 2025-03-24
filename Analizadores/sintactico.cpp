@@ -591,6 +591,9 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
     string functionName = datos[initial].dato;
     initial++;
 
+    /*Funtion newFunction;
+    newFunction.name = functionName;*/
+
     if (datos[initial].dato != "(") {
         throw CompilatorError("falta parentesis izquierdo '('.", datos[final].linea, datos[final].columna);
     }
@@ -625,6 +628,8 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
     if (!Check::isDatatype(datos[initial].dato)) {
         throw CompilatorError("no existe o es incorrecto el datatype usado en la funcion.", datos[initial].linea, datos[initial].columna);
     }
+
+    //newFunction.type = datos[initial].dato;
 
     initial = final + 2;
     bool function_error = true;

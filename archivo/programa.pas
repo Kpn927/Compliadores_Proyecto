@@ -1,23 +1,29 @@
 program Hola;
 
-function pruebas(n,y,z,o:integer, x:double): integer;
+function pruebas(n,y,z,o:integer; x:double): integer;
 var
-  w, result: integer;
+  w1, result: integer;
   T: double;
 begin
-  writeln(x);
-  pruebas;
+  writeln(w1);
+  //pruebas;
 end;
+
+// A PROCEDURE SE LE PUEDEN PASAR COSAS
+{*procedure PrintGreeting();
+begin
+  writeln("Hello, ! Welcome to Pascal programming.");
+end;*}
 
 var 
     x,y,z,y1:integer;
     w:double;
-    writeln:integer;
+    //writeln:integer;
     test:character;
 begin
     test := 'h';
      x := 0;
-     else := 0;
+     w := 0;
     if (x > 3) then
     begin
         if (y < 5) then

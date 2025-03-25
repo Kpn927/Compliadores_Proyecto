@@ -21,7 +21,7 @@ class Syntax{
     int ifAnalizer(vector<Datos>& datos, int &i);
     
     // Método para sintaxis de Begin-End
-    void getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, bool isProcedure, bool &isFunction, string functionName);
+    void getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &initialNumber, bool isPrincipal, Function *newFunction);
 
     // Método para crear los árboles
     void recursiveTree(Node<string>* actual, Tree<string>&padre, vector<string> &symbols, vector<Datos> &datos, int initialNumber, int finalNumber);
@@ -30,7 +30,7 @@ class Syntax{
     void recursiveTree(Tree<string>&padre, vector<Datos> &datos, int initialNumber, int finalNumber);
 
     //Sintaxis de Var en Pascal
-    void getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &initial, bool isFunction);
+    void getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &initial, Function* function);
 
     //sintaxis de Asignaciones x:=1;
     void getSyntaxAsignation(vector<Datos> &datos, vector<string> &symbols, int &initial);

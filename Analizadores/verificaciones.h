@@ -30,6 +30,8 @@ class Check{
     static string getType(string variable);
 
     static int getLastQuotes(int initial, vector<Datos> datos);
+
+    static bool isFunction(string word);
 };
 
 int Check::getLastParentesis(int initial, vector<Datos> datos){
@@ -39,6 +41,7 @@ int Check::getLastParentesis(int initial, vector<Datos> datos){
             initial = Check::getLastParentesis(initial, datos);
         }
         initial++;
+        if (initial>= datos.size()) return datos.size();
     }
     return initial;
 }
@@ -180,6 +183,13 @@ bool Check::isReserved(string word){
 bool Check::isVariable(string word){
     for (const Variables& variable : variables) {
         if (variable.name == word) return true;
+    }
+    return false;
+}
+
+bool Check::isFunction(string word){
+    for (const Function& function : functions) {
+        if (function.name == word) return true;
     }
     return false;
 }

@@ -6,7 +6,7 @@ var
   T: double;
 begin
   writeln(w1);
-  //pruebas;
+  pruebas := w1; // me voy a matar honestamente
 end;
 
 // A PROCEDURE SE LE PUEDEN PASAR COSAS
@@ -21,6 +21,7 @@ var
     //writeln:integer;
     test:character;
 begin
+    pruebas(5, 3, 2);
     test := 'h';
      x := 0;
      w := 0;

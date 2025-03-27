@@ -659,10 +659,12 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
         throw CompilatorError("procedure no puede tener datatype.", datos[initial].linea, datos[initial].columna);
     }
 
-    Variables funcVar;
-    funcVar.name = newFunction->name;
-    funcVar.type = newFunction->type;
-    variables.push_back(funcVar);
+    functions.push_back(*newFunction);
+    newFunction = nullptr; 
+    // Variables funcVar;
+    // funcVar.name = newFunction->name;
+    // funcVar.type = newFunction->type;
+    // variables.push_back(funcVar);
 
     initial = initial + 2;
     if(datos[initial].dato == "var"){
@@ -686,7 +688,6 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
         throw CompilatorError("la funcion no tiene un return", datos[initial].linea, datos[initial].columna);
     }
 
-    functions.push_back(*newFunction);
-    newFunction == nullptr; 
+    
 
 }

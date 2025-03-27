@@ -21,6 +21,7 @@ var
     //writeln:integer;
     test:character;
 begin
+    pruebas(1,2,3);
     test := 'h';
      x := 0;
      w := 0;

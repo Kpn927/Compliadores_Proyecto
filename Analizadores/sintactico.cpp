@@ -92,71 +92,77 @@ void Syntax::getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &
         else if (datos[initialNumber].dato=="writeln") getSyntaxwriteln(datos, symbols, initialNumber);
         else if (datos[initialNumber].dato=="readln") getSyntaxreadln(datos, symbols, initialNumber);
         else if (Check::isFunction(datos[initialNumber].dato)) {
+            cout << "matenme" << endl;
             if (newFunction!=nullptr){
+                cout << "No hola" << endl;
                 // LOGICA PARA VERIFICAR EL TIPO DE RETORNO
                 // Idea, usar getSyntaxAsignation
             }
             else {
+                cout << "Hola" << endl;
                 // LOGICA PARA LLAMADO DE LA FUNCION
                 // Verifiacion de tipos
-                string funcName = datos[initialNumber].dato;
-                Function calledFunc;
-                bool found = false;
-                for (const Function& func : functions) {
-                    if (func.name == funcName) {
-                        calledFunc = func;
-                        found = true; 
-                        break;
-                    }
-                }
-                if (!found) {
-                    throw CompilatorError("Funcion no declarada", datos[initialNumber].linea, datos[initialNumber].columna);
-                }
-                initialNumber++;
-                if (initialNumber >= datos.size() || datos[initialNumber].dato != "(") {
-                    throw CompilatorError("Falta '(' en llamado de funcion", datos[initialNumber].linea, datos[initialNumber].columna);
-                }
-                initialNumber++;
+                // string funcName = datos[initialNumber].dato;
+                // Function calledFunc;
+                // bool found = false;
+                // for (const Function& func : functions) {
+                //     if (func.name == funcName) {
+                //         calledFunc = func;
+                //         found = true; 
+                //         break;
+                //     }
+                // }
+                // // if (!found) {
+                // //     throw CompilatorError("Funcion no declarada", datos[initialNumber].linea, datos[initialNumber].columna);
+                // // }
+                // // initialNumber++;
+                // if (initialNumber >= datos.size() || datos[initialNumber].dato != "(") {
+                //     throw CompilatorError("Falta '(' en llamado de funcion", datos[initialNumber].linea, datos[initialNumber].columna);
+                // }
+                // initialNumber++;
 
-                int ParameterIndex = 0;
-                vector<Variables> params = calledFunc.variables;
+                // int ParameterIndex = 0;
+                // vector<Variables> params = calledFunc.variables;
+                // for (const auto& param : params) {
+                //     cout << "Param Name: " << param.name << ", Param Type: " << param.type << endl;
+                // }
+                
+                // while (initialNumber < datos.size() && datos[initialNumber].dato != ")") {
+                //     if (ParameterIndex >= params.size()) {
+                //         throw CompilatorError("Demasiados argumentos en la llamada a la funcion", datos[initialNumber].linea, datos[initialNumber].columna);
+                //     }
+                //     string argType;
+                //     string currentToken = datos[initialNumber].dato;
 
-                while (initialNumber < datos.size() && datos[initialNumber].dato != ")") {
-                    if (ParameterIndex >= params.size()) {
-                        throw CompilatorError("Demasiados argumentos en la llamada a la funcion", datos[initialNumber].linea, datos[initialNumber].columna);
-                    }
-                    string argType;
-                    string currentToken = datos[initialNumber].dato;
+                //     if (Check::isVariable(currentToken)) {
+                //         argType = Check::getType(currentToken); 
+                //     } else if (Check::isNumber(currentToken)) {
+                //         argType = currentToken.find('.') != string::npos ? "real" : "integer";
+                //     } else {
+                //         throw CompilatorError("Argumento invalido en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
+                //     }
+                //     if (argType != params[ParameterIndex].type) {
+                //         throw CompilatorError("Argumento invalido en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
+                //     }
+                //     ParameterIndex++;
+                //     initialNumber++;
 
-                    if (Check::isVariable(currentToken)) {
-                        argType = Check::getType(currentToken); 
-                    } else if (Check::isNumber(currentToken)) {
-                        argType = currentToken.find('.') != string::npos ? "real" : "integer";
-                    } else {
-                        throw CompilatorError("Argumento invalido en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
-                    }
-                    if (argType != params[ParameterIndex].type) {
-                        throw CompilatorError("Argumento invalido en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
-                    }
-                    ParameterIndex++;
-                    initialNumber++;
+                //     if (datos[initialNumber].dato == ",") {
+                //         initialNumber++;
+                //         if (initialNumber >= datos.size() || datos[initialNumber].dato == ")") {
+                //             throw CompilatorError("Falta argumento en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
+                //         }
+                //     } else if (datos[initialNumber].dato != ")") {
+                //         throw CompilatorError("Falta ',' o ')' en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
+                //     }
+                // }
 
-                    if (datos[initialNumber].dato == ",") {
-                        initialNumber++;
-                        if (initialNumber >= datos.size() || datos[initialNumber].dato == ")") {
-                            throw CompilatorError("Falta argumento en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
-                        }
-                    } else if (datos[initialNumber].dato != ")") {
-                        throw CompilatorError("Falta ',' o ')' en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
-                    }
-                }
+                // if (ParameterIndex != params.size()) {
+                //     throw CompilatorError("Faltan argumentos en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
+                // }
 
-                if (ParameterIndex != params.size()) {
-                    throw CompilatorError("Faltan argumentos en llamada a funcion", datos[initialNumber].linea, datos[initialNumber].columna);
-                }
-
-                initialNumber++;
-                initialNumber = getFinalNumber(initialNumber, datos);
+                // initialNumber++;
+                // initialNumber = getFinalNumber(initialNumber, datos);
             }
             // Por ahora, se salta
             initialNumber = getFinalNumber(initialNumber,datos) -1;
@@ -668,9 +674,6 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
 
     getSyntaxBegin(datos, symbols, initial, false, newFunction);
 
-    functions.push_back(*newFunction);
-    newFunction == nullptr;
-
     bool hasReturn = false;
     for (const Variables& var : variables) {
         if (var.name == newFunction->name && !var.value.empty()) {
@@ -682,5 +685,8 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
     if (!hasReturn) {
         throw CompilatorError("la funcion no tiene un return", datos[initial].linea, datos[initial].columna);
     }
+
+    functions.push_back(*newFunction);
+    newFunction == nullptr; 
 
 }

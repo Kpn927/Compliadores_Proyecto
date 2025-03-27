@@ -1,6 +1,6 @@
 program Hola;
 
-function pruebas(x:integer; y1:double; pop,popa,pepe:real): double;
+function pruebas(x:integer; y1:double; pop,popa,pepe:real): integer;
 var
   w1, result: integer;
   T: double;
@@ -21,7 +21,6 @@ var
     //writeln:integer;
     test:character;
 begin
-    pruebas(5, 3, 2);
     test := 'h';
      x := 0;
      w := 0;

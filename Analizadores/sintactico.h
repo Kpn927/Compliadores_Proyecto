@@ -45,7 +45,7 @@ class Syntax{
     void getSyntaxreadln(vector<Datos> &datos, vector<string> &symbols, int &initial);
 
     // Analizador de funciones
-    void getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, int &initial);
+    void getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, int &initial, bool function_type);
 
     string phraseAnalizer(Node<string> *nodo);
 

@@ -1,6 +1,6 @@
 program Hola;
 
-function pruebas(n,y,z,o:integer; x:double): integer;
+function pruebas(x:integer; y1:double; pop,popa,pepe:real): double;
 var
   w1, result: integer;
   T: double;
@@ -37,7 +37,7 @@ for x := 0 to 150 do
         x := x + 1;
     end;
 
-    writeln("");
+    writeln('hola');
 
     x := x + 1;
     y1 := 10;

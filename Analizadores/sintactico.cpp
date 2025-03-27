@@ -13,12 +13,14 @@ void Syntax::getSyntax(vector<Datos> &datos) {
 
         int initialNumber = 3;
         
+        // function
         if (datos[initialNumber].dato == identifiers[3]) {
-            getSyntaxfunction(datos, symbols, initialNumber);
+            getSyntaxfunction(datos, symbols, initialNumber, true);
         }
         
+        // procedure
         if (datos[initialNumber].dato == identifiers[2]) {
-            getSyntaxprocedure(datos, symbols, initialNumber);
+            getSyntaxfunction(datos, symbols, initialNumber, false);
         }
         
         if (datos[initialNumber].dato == identifiers[0] || (datos[initialNumber].dato != identifiers[3] && datos[initialNumber].dato != identifiers[4])) {
@@ -110,18 +112,19 @@ void Syntax::getSyntaxBegin(vector<Datos> &datos, vector<string> &symbols, int &
 
 void Syntax::getSyntaxVar(vector<Datos> &datos, vector<string> &symbols, int &initial, Function* function) {
     int final;
-    if (Check::getLastParentesis(initial,datos)< getFinalNumber(initial, datos)) final = Check::getLastParentesis(initial,datos) - 1;
-    else final = getFinalNumber(initial, datos);
+    if (Check::getLastParentesis(initial,datos) < getFinalNumber(initial, datos)) final = Check::getLastParentesis(initial,datos) - 1;
+    else final = getFinalNumber(initial, datos); 
+    if (datos[final].dato == ")") final--;
     Tree<string> arbolvar;
-
+    
     // Avanzar si es un identificador válido
     if (datos[initial].dato == identifiers[0]) {
         initial++;
     }
     arbolvar.insertarOrdenado("", 0);
-
+    
     recursiveTree(arbolvar, datos, initial, final);
-
+    
     Node<string> *a = arbolvar.getRaiz()->getLeft();
     Node<string> *b = arbolvar.getRaiz()->getRight();
     Variables newVariable;
@@ -423,20 +426,20 @@ string getString(vector<Datos> datos, int &initialNumber, int &finalNumber) {
 
     string value = "";
 
-    if (datos[initialNumber].dato == "\"") {
+    if (datos[initialNumber].dato == "\'") {
         value += datos[initialNumber].dato;
         initialNumber++;
 
-        while (initialNumber <= finalNumber && datos[initialNumber].dato != "\"") {
+        while (initialNumber <= finalNumber && datos[initialNumber].dato != "\'") {
             value += datos[initialNumber].dato;
             initialNumber++;
-            if (datos[initialNumber].dato == "\"") {
+            if (datos[initialNumber].dato == "\'") {
                 finalNumber = initialNumber;
                 break;
             }
         }
 
-        if (initialNumber <= finalNumber && datos[initialNumber].dato == "\"") {
+        if (initialNumber <= finalNumber && datos[initialNumber].dato == "\'") {
             value += datos[initialNumber].dato;
         } else {
             throw CompilatorError("Falta una comilla de cierre.", datos[initialNumber].linea, datos[initialNumber].columna);
@@ -464,16 +467,16 @@ void Syntax::getSyntaxwriteln(vector<Datos> &datos, vector<string> &symbols, int
     }
         
     while (initial != final) {
-            
-        if (datos[initial].dato == "\"") {
+        
+        if (datos[initial].dato == "\'") {
             string value = getString(datos, initial, final);
             initial = final;
-            if (datos[initial].dato == "\"") {
+            if (datos[initial].dato == "\'") {
                 initial++;
             }
             final = getFinalNumber(initial, datos);
             something.push_back(value);
-            if (datos[initial].dato == "\"") {
+            if (datos[initial].dato == "\'") {
                 throw CompilatorError("no pueden existir 2 strings pegados.", datos[initial].linea, datos[initial].columna);
             }
             continue;
@@ -497,7 +500,7 @@ void Syntax::getSyntaxwriteln(vector<Datos> &datos, vector<string> &symbols, int
         }
         
         if (!Check::isVariable(datos[initial].dato)) {
-            throw CompilatorError("lo ingresado no es variable o no hay nada.", datos[initial].linea, datos[initial].columna);
+            throw CompilatorError("lo ingresado en el writeln no esta permitido o no inicializado.", datos[initial].linea, datos[initial].columna);
         }
         
         if (initial == final) {
@@ -544,25 +547,13 @@ void Syntax::getSyntaxreadln(vector<Datos> &datos, vector<string> &symbols, int 
     
 }
 
-void Syntax::getSyntaxprocedure(vector<Datos> &datos, vector<string> &symbols, int &initial) {
-    int final = getFinalNumber(initial, datos);
-    initial ++;
-    if (datos[final].dato != ")") throw CompilatorError("falta un parentesis derecho", datos[final].linea, datos[final].columna);
-
-    if (datos[initial+2].dato != "(")throw CompilatorError("falta un parentesis izquierdo", datos[initial+1].linea, datos[initial+1].columna);
-    initial = final + 2;
-    getSyntaxBegin(datos, symbols, initial, false, nullptr);
-    variables.clear();
-    initial++;
-}
-
-void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, int &initial) {
+void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, int &initial, bool function_type) {
     initial++;
 
     if (Check::isReserved(datos[initial].dato)) {
-        throw CompilatorError("no existe el nombre de la funcion. ", datos[initial].linea, datos[initial].columna);
+        throw CompilatorError("no existe el nombre de la funcion o procedure. ", datos[initial].linea, datos[initial].columna);
     }
-
+    
     Function* newFunction = new Function;
     newFunction->name = datos[initial].dato;
     initial++;
@@ -571,21 +562,38 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
         throw CompilatorError("falta parentesis izquierdo '('.", datos[initial].linea, datos[initial].columna);
     }
     initial++;
-
-    while (datos[initial].dato != ":") {
-        getSyntaxVar(datos, symbols, initial, newFunction);
+    if (datos[initial].dato != ")") {
+        while (datos[initial].dato != ":") {
+            getSyntaxVar(datos, symbols, initial, newFunction);
+            if (datos[initial].dato == ";") {
+                initial--;
+                break;
+            }
+            
+        }
+    } else if (datos[initial].dato == ")") {
+        initial++;
     }
+    
+    
+    if (function_type)
+    {
+        if (datos[initial].dato != ":") {
+            throw CompilatorError("falta los ':' despues de la declaracion del datatype de la funcion.", datos[initial].linea, datos[initial].columna);
+        }
 
-    if (datos[initial].dato != ":") {
-        throw CompilatorError("falta los ':' despues de la declaracion del datatype de la funcion.", datos[initial].linea, datos[initial].columna);
+        initial++;
+    
+        if (!Check::isDatatype(datos[initial].dato)) {
+            throw CompilatorError("no existe o es incorrecto el datatype usado en la funcion.", datos[initial].linea, datos[initial].columna);
+        }
+        newFunction->type = datos[initial].dato;
     }
-    initial++;
-
-    if (!Check::isDatatype(datos[initial].dato)) {
-        throw CompilatorError("no existe o es incorrecto el datatype usado en la funcion.", datos[initial].linea, datos[initial].columna);
+    
+    if (datos[initial].dato == ":")
+    {
+        throw CompilatorError("procedure no puede tener datatype.", datos[initial].linea, datos[initial].columna);
     }
-
-    newFunction->type = datos[initial].dato;
 
     initial = initial + 2;
     if(datos[initial].dato == "var"){
@@ -594,6 +602,7 @@ void Syntax::getSyntaxfunction(vector<Datos> &datos, vector<string> &symbols, in
                 getSyntaxVar(datos, symbols, initial, nullptr);
             }
     }
+
     getSyntaxBegin(datos, symbols, initial, false, newFunction);
 
     functions.push_back(*newFunction);

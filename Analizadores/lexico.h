@@ -36,7 +36,6 @@ struct Function{
     string name;
     string type;
     vector<Variables> variables;
-    bool hasReturn = false;
 };
 
 vector<string> reserved = {"if", "then", "to", "do", "downto", "writeln", "readln", "else"};

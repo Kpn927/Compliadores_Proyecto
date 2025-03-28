@@ -32,6 +32,10 @@ class Check{
     static int getLastQuotes(int initial, vector<Datos> datos);
 
     static bool isFunction(string word);
+
+    static Variables getVariable(string word);
+
+    static Function getFunction(string word);
 };
 
 int Check::getLastParentesis(int initial, vector<Datos> datos){
@@ -199,4 +203,20 @@ bool Check::isDatatype(string word){
         if (word == type) return true;
     }
     return false;
+}
+
+Variables Check::getVariable(string word) {
+    for (const Variables var : variables) {
+        if (word == var.name) return var;
+    }
+    Variables voidVariable;
+    return voidVariable;
+}
+
+Function Check::getFunction(string word) {
+    for (const Function func : functions) {
+        if (word == func.name) return func;
+    }
+    Function voidFunction;
+    return voidFunction;
 }

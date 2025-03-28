@@ -306,7 +306,7 @@ void Syntax::getSyntaxAsignation(vector<Datos> &datos, vector<string> &symbols, 
         if(arbolvar.getRaiz()->getLeft()->getValue() == variables[i].name) variables[i].value = value;
         i++;
     }
-    if (value == "inf") throw CompilatorError("El resultado es infinito", datos[initial].linea, datos[initial+2].columna);
+    if (value == "inf") throw CompilatorError("División entre 0 no es posible", datos[initial].linea, datos[initial+2].columna);
     cout<<"[resultado: "<<value<<"]"<<endl;
     arbolvar.~Tree();
     return;

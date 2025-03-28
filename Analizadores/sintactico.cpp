@@ -359,12 +359,26 @@ int Syntax::ifAnalizer(vector<Datos>& datos, int &i) {
         i++;
     }
 
+    vector<Datos> conditionTokens;
     while (i < datos.size() && datos[i].dato != ")" && datos[i].dato != "then") {
         if (!Check::isIdentifier(datos[i].dato) &&
             !isOperator(datos[i].dato) &&
-            !Check::isNumber(datos[i].dato)) throw CompilatorError("la condicion dentro del if esta mal", datos[i].linea, datos[i].columna);
+            !Check::isNumber(datos[i].dato)) throw CompilatorError("la condicion dentro del if no es valida", datos[i].linea, datos[i].columna);
+            conditionTokens.push_back(datos[i]);
             i++;
     }
+
+    vector<string> comparisonOps = {"=", "<", ">", "<=", ">=", "<>", "==", "!="};
+    bool hasComparison = false;
+    for (const Datos& token : conditionTokens) {
+        if (find(comparisonOps.begin(), comparisonOps.end(), token.dato) != comparisonOps.end()) {
+            hasComparison = true;
+            break;
+        }
+    }
+    if (!hasComparison) throw CompilatorError("la condicion dentro del if no es valida", datos[i].linea, datos[i].columna);
+
+
     if (i >= datos.size() || datos[i].dato == ")") {
         i++;
     }

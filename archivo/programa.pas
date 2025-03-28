@@ -17,8 +17,8 @@ begin
     pruebas(1,2);
     test := 'h';
      x := 0;
-     w := 3/0;
-    if (x * 3) then
+     w := 3;
+    if (x * 4) then
     begin
         if (y < 3) then
             z := 10;

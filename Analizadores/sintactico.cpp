@@ -394,7 +394,7 @@ int Syntax::ifAnalizer(vector<Datos>& datos, int &i) {
         leftType = var.type;
     } else if (Check::isNumber(leftOperand.dato)) {
         if (leftOperand.dato.find('.') != string::npos) {
-            leftType = "real";
+            leftType = "double";
         } else {
             leftType = "integer";
         }
@@ -407,7 +407,7 @@ int Syntax::ifAnalizer(vector<Datos>& datos, int &i) {
         rightType = var.type;
     } else if (Check::isNumber(rightOperand.dato)) {
         if (rightOperand.dato.find('.') != string::npos) {
-            rightType = "real";
+            rightType = "double";
         } else {
             rightType = "integer";
         }
@@ -416,7 +416,13 @@ int Syntax::ifAnalizer(vector<Datos>& datos, int &i) {
     }
 
     if (leftType != rightType) {
-        throw CompilatorError("la condicion dentro del if no es valida", leftOperand.linea, leftOperand.columna);
+        if (leftType == "integer" && rightType == "double") {
+            leftType = rightType;
+        } else if (leftType == "double" && rightType == "integer") {
+            rightType = leftType;
+        } else {
+            throw CompilatorError("la condicion dentro del if no es valida", leftOperand.linea, leftOperand.columna);
+        }
     }
 
 

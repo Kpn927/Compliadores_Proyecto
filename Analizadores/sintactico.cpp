@@ -369,14 +369,55 @@ int Syntax::ifAnalizer(vector<Datos>& datos, int &i) {
     }
 
     vector<string> comparisonOps = {"=", "<", ">", "<=", ">=", "<>", "==", "!="};
+    size_t opIndex = 0;
     bool hasComparison = false;
-    for (const Datos& token : conditionTokens) {
-        if (find(comparisonOps.begin(), comparisonOps.end(), token.dato) != comparisonOps.end()) {
+    for (size_t j = 0; j < conditionTokens.size(); ++j) {
+        if (find(comparisonOps.begin(), comparisonOps.end(), conditionTokens[j].dato) != comparisonOps.end()) {
             hasComparison = true;
+            opIndex = j;
             break;
         }
     }
     if (!hasComparison) throw CompilatorError("la condicion dentro del if no es valida", datos[i].linea, datos[i].columna);
+
+    if (opIndex == 0 || opIndex >= conditionTokens.size() - 1) {
+        throw CompilatorError("la condicion dentro del if no es valida", datos[i].linea, datos[i].columna);
+    }
+
+    Datos leftOperand = conditionTokens[opIndex - 1];
+    Datos rightOperand = conditionTokens[opIndex + 1];
+
+    string leftType, rightType;
+
+    if (Check::isVariable(leftOperand.dato)) {
+        Variables var = Check::getVariable(leftOperand.dato);
+        leftType = var.type;
+    } else if (Check::isNumber(leftOperand.dato)) {
+        if (leftOperand.dato.find('.') != string::npos) {
+            leftType = "real";
+        } else {
+            leftType = "integer";
+        }
+    } else {
+        throw CompilatorError("la condicion dentro del if no es valida", leftOperand.linea, leftOperand.columna);
+    }
+
+    if (Check::isVariable(rightOperand.dato)) {
+        Variables var = Check::getVariable(rightOperand.dato);
+        rightType = var.type;
+    } else if (Check::isNumber(rightOperand.dato)) {
+        if (rightOperand.dato.find('.') != string::npos) {
+            rightType = "real";
+        } else {
+            rightType = "integer";
+        }
+    } else {
+        throw CompilatorError("la condicion dentro del if no es valida", rightOperand.linea, rightOperand.columna);
+    }
+
+    if (leftType != rightType) {
+        throw CompilatorError("la condicion dentro del if no es valida", leftOperand.linea, leftOperand.columna);
+    }
 
 
     if (i >= datos.size() || datos[i].dato == ")") {

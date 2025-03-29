@@ -18,7 +18,7 @@ begin
     test := 'h';
      x := 0;
      w := 3;
-    if (x * 4) then
+    if (x > test) then
     begin
         if (y < 3) then
             z := 10;
